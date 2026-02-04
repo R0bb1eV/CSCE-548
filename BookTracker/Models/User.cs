@@ -13,5 +13,10 @@ namespace BookTracker
         public string Email { get; set; }
         public DateTime DOB { get; set; }
         public DateTime AccountCreationDate { get; set; }
+
+        public override string ToString()
+        {
+            return $"UserId: {UserId}, Username: {Username}, Email: {Email}, DOB: {DOB.ToShortDateString()}, Created: {AccountCreationDate.ToShortDateString()}";
+        }
     }
 }

@@ -13,5 +13,10 @@ namespace BookTracker
         public string? MiddleName { get; set; }
         public string LastName { get; set; }
         public int BirthYear { get; set; }
+
+        public override string ToString()
+        {
+            return $"AuthorId: {AuthorId}, Name: {FirstName} {(MiddleName ?? "")} {LastName}, BirthYear: {BirthYear}";
+        }
     }
 }

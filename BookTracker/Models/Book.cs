@@ -16,5 +16,10 @@ namespace BookTracker
         public int YearOfRelease { get; set; }
         public string ISBN { get; set; }
         public int AuthorId { get; set; }
+
+        public override string ToString()
+        {
+            return $"BookId: {ID}, Title: {Title}, AuthorId: {AuthorId}, Genre: {Genre}, Pages: {PageCount}, Year: {YearOfRelease}, ISBN: {ISBN}";
+        }
     }
 }

@@ -17,19 +17,23 @@ namespace BookTrackerTest
             // =================== AUTHOR TEST ===================
             Console.WriteLine("----- AUTHOR TABLE TEST -----");
 
+            // Seed if empty
+            if (dp.ReadAllAuthors().Count == 0)
+            {
+                dp.CreateAuthor(new Author { FirstName = "J.K.", LastName = "Rowling", BirthYear = 1965 });
+                dp.CreateAuthor(new Author { FirstName = "George", LastName = "Orwell", BirthYear = 1903 });
+            }
+
             // Insert
             var newAuthor = new Author { FirstName = "Test", MiddleName = "T", LastName = "Author", BirthYear = 1990 };
             dp.CreateAuthor(newAuthor);
-
             Console.WriteLine("Inserted Author:");
-            var authors = dp.ReadAllAuthors();
-            PrintList(authors);
+            PrintList(dp.ReadAllAuthors());
 
             // Update
-            var authorToUpdate = authors[^1]; // Last author (the one we just added)
+            var authorToUpdate = dp.ReadAllAuthors()[^1]; // Last author (the one we just added)
             authorToUpdate.FirstName = "Updated";
             dp.UpdateAuthor(authorToUpdate);
-
             Console.WriteLine("Updated Author:");
             PrintList(dp.ReadAllAuthors());
 
@@ -41,6 +45,22 @@ namespace BookTrackerTest
             // =================== BOOK TEST ===================
             Console.WriteLine("\n----- BOOK TABLE TEST -----");
 
+            // Seed if empty
+            if (dp.ReadAllBooks().Count == 0)
+            {
+                var firstAuthor = dp.ReadAllAuthors()[0];
+                dp.CreateBook(new Book
+                {
+                    Title = "Harry Potter and the Sorcerer's Stone",
+                    PageCount = 309,
+                    Genre = "Fantasy",
+                    PublishingHouse = "Bloomsbury",
+                    YearOfRelease = 1997,
+                    ISBN = "9780747532699",
+                    AuthorId = firstAuthor.AuthorId
+                });
+            }
+
             // Insert
             var newBook = new Book
             {
@@ -50,10 +70,9 @@ namespace BookTrackerTest
                 PublishingHouse = "Test House",
                 YearOfRelease = 2026,
                 ISBN = "1234567890123",
-                AuthorId = 1 // Make sure author 1 exists
+                AuthorId = dp.ReadAllAuthors()[0].AuthorId
             };
             dp.CreateBook(newBook);
-
             Console.WriteLine("Inserted Book:");
             PrintList(dp.ReadAllBooks());
 
@@ -61,7 +80,6 @@ namespace BookTrackerTest
             var bookToUpdate = dp.ReadAllBooks()[^1];
             bookToUpdate.Title = "Updated Book";
             dp.UpdateBook(bookToUpdate);
-
             Console.WriteLine("Updated Book:");
             PrintList(dp.ReadAllBooks());
 
@@ -73,10 +91,26 @@ namespace BookTrackerTest
             // =================== USER TEST ===================
             Console.WriteLine("\n----- USER TABLE TEST -----");
 
-            // Insert
-            var newUser = new User { Username = "testuser", Email = "testuser@example.com", DOB = new DateTime(2000, 1, 1) };
-            dp.CreateUser(newUser);
+            // Seed if empty
+            if (dp.ReadAllUsers().Count == 0)
+            {
+                dp.CreateUser(new User
+                {
+                    Username = "user1",
+                    Email = "user1@example.com",
+                    DOB = new DateTime(1990, 1, 1),
+                    AccountCreationDate = DateTime.Now
+                });
+            }
 
+            // Insert
+            var newUser = new User
+            {
+                Username = "testuser",
+                Email = "testuser@example.com",
+                DOB = new DateTime(2000, 1, 1)
+            };
+            dp.CreateUser(newUser);
             Console.WriteLine("Inserted User:");
             PrintList(dp.ReadAllUsers());
 
@@ -84,7 +118,6 @@ namespace BookTrackerTest
             var userToUpdate = dp.ReadAllUsers()[^1];
             userToUpdate.Username = "updateduser";
             dp.UpdateUser(userToUpdate);
-
             Console.WriteLine("Updated User:");
             PrintList(dp.ReadAllUsers());
 
@@ -96,18 +129,32 @@ namespace BookTrackerTest
             // =================== ACTIVITY TEST ===================
             Console.WriteLine("\n----- ACTIVITY TABLE TEST -----");
 
+            // Seed if empty
+            if (dp.ReadAllActivities().Count == 0)
+            {
+                var firstUser = dp.ReadAllUsers()[0];
+                var firstBook = dp.ReadAllBooks()[0];
+                dp.CreateActivity(new Activity
+                {
+                    UserId = firstUser.UserId,
+                    BookId = firstBook.ID,
+                    BookStatus = "reading",
+                    ProgressCompleted = 25,
+                    StartDate = DateTime.Today,
+                    EndDate = null
+                });
+            }
+
             // Insert
             var newActivity = new Activity
             {
-                UserId = 1, // Make sure user 1 exists
-                BookId = 1, // Make sure book 1 exists
+                UserId = dp.ReadAllUsers()[0].UserId,
+                BookId = dp.ReadAllBooks()[0].ID,
                 BookStatus = "reading",
                 ProgressCompleted = 25,
-                StartDate = DateTime.Today,
-                EndDate = null
+                StartDate = DateTime.Today
             };
             dp.CreateActivity(newActivity);
-
             Console.WriteLine("Inserted Activity:");
             PrintList(dp.ReadAllActivities());
 
@@ -117,7 +164,6 @@ namespace BookTrackerTest
             activityToUpdate.ProgressCompleted = 100;
             activityToUpdate.EndDate = DateTime.Today;
             dp.UpdateActivity(activityToUpdate);
-
             Console.WriteLine("Updated Activity:");
             PrintList(dp.ReadAllActivities());
 

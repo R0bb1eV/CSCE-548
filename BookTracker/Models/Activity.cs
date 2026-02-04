@@ -15,5 +15,10 @@ namespace BookTracker
         public int ProgressCompleted { get; set; } // As a percentage
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+
+        public override string ToString()
+        {
+            return $"ActivityId: {ActivityId}, UserId: {UserId}, BookId: {BookId}, Status: {BookStatus}, Progress: {ProgressCompleted}%, Start: {StartDate?.ToShortDateString()}, End: {EndDate?.ToShortDateString()}";
+        }
     }
 }
