@@ -1,0 +1,218 @@
+:root {
+    color-scheme: light;
+    --bg-top: #f4f8f7;
+    --bg-bottom: #eef3f7;
+    --surface: #ffffff;
+    --surface-soft: #f8fafb;
+    --text: #1f2937;
+    --muted: #526072;
+    --border: #d9e1e8;
+    --accent: #0f766e;
+    --accent-hover: #0b5f59;
+    --accent-soft: #e6f4f2;
+    --danger: #b91c1c;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Trebuchet MS", "Gill Sans", "Lucida Sans Unicode", sans-serif;
+    background:
+        radial-gradient(circle at 15% -5%, #d9ece7 0%, transparent 35%),
+        radial-gradient(circle at 85% -10%, #dce8f5 0%, transparent 35%),
+        linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+    color: var(--text);
+}
+
+.container {
+    max-width: 1380px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 2rem;
+}
+
+.hero {
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1rem 1.15rem;
+    background:
+        linear-gradient(120deg, #f9fdfc 0%, #f6fbff 100%);
+    box-shadow: 0 10px 24px rgba(40, 62, 84, 0.08);
+}
+
+.eyebrow {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+    color: var(--accent);
+    font-weight: 700;
+}
+
+h1 {
+    margin: 0.2rem 0 0.35rem;
+    font-size: clamp(1.4rem, 2.8vw, 2rem);
+}
+
+.intro {
+    margin: 0;
+    color: var(--muted);
+}
+
+.config {
+    margin-top: 0.9rem;
+    margin-bottom: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.85rem;
+    padding: 0.8rem 0.9rem;
+    box-shadow: 0 6px 18px rgba(40, 62, 84, 0.06);
+}
+
+.api-url-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+}
+
+#apiBaseUrl {
+    width: 100%;
+    max-width: 460px;
+    padding: 0.58rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 0.55rem;
+    background: #ffffff;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    gap: 1.1rem;
+}
+
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.95rem;
+    padding: 1rem;
+    box-shadow: 0 8px 22px rgba(40, 62, 84, 0.07);
+}
+
+.panel h2 {
+    margin: 0 0 0.55rem;
+    font-size: 1.08rem;
+}
+
+.panel h3 {
+    margin: 0.35rem 0 0.15rem;
+    font-size: 0.76rem;
+    color: var(--accent);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    background: var(--accent-soft);
+    border: 1px solid #cce5e1;
+    padding: 0.27rem 0.5rem;
+    border-radius: 0.45rem;
+    display: inline-block;
+}
+
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.inline {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+input {
+    min-width: 0;
+    flex: 1;
+    padding: 0.52rem 0.58rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--surface-soft);
+}
+
+textarea {
+    width: 100%;
+    min-height: 112px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.76rem;
+    line-height: 1.35;
+    padding: 0.55rem 0.62rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    resize: vertical;
+    background: #fbfcfe;
+}
+
+input:focus,
+textarea:focus {
+    outline: none;
+    border-color: #7ab9b2;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+button {
+    border: 0;
+    padding: 0.5rem 0.78rem;
+    border-radius: 0.55rem;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+button:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(15, 118, 110, 0.24);
+}
+
+button[data-action="delete"] {
+    background: var(--danger);
+}
+
+button[data-action="delete"]:hover {
+    background: #991b1b;
+    box-shadow: 0 6px 14px rgba(153, 27, 27, 0.24);
+}
+
+pre {
+    margin: 0.8rem 0 0;
+    min-height: 190px;
+    max-height: 330px;
+    overflow: auto;
+    background: #102133;
+    color: #daf7e8;
+    border: 1px solid #223852;
+    padding: 0.78rem;
+    border-radius: 0.55rem;
+    font-size: 0.75rem;
+    line-height: 1.38;
+}
+
+@media (max-width: 700px) {
+    .container {
+        padding: 1rem 0.7rem 1.4rem;
+    }
+
+    .panel {
+        padding: 0.85rem;
+    }
+
+    .inline {
+        flex-direction: column;
+    }
+
+    .inline button {
+        width: 100%;
+    }
+}

@@ -12,6 +12,15 @@ builder.WebHost.UseUrls("http://localhost:5080");
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("WebClientCors", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 
 var connectionString = builder.Configuration.GetConnectionString("BookTrackerDb")
     ?? throw new InvalidOperationException("Missing connection string: ConnectionStrings:BookTrackerDb");
@@ -29,5 +38,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseCors("WebClientCors");
 app.MapControllers();
 app.Run();
