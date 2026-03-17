@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="webclient-api-base-url" content="__RENDER_API_BASE_URL__">
     <title>BookTracker Web Client</title>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -18,7 +19,7 @@
 
         <section class="config">
             <label class="api-url-label" for="apiBaseUrl">API Base URL</label>
-            <input id="apiBaseUrl" type="text" value="http://localhost:5080" />
+            <input id="apiBaseUrl" type="text" value="" placeholder="https://your-api-host.example.com" />
         </section>
 
         <section class="grid">
