@@ -10,7 +10,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Service URL: http://localhost:5080
 builder.WebHost.UseUrls("http://localhost:5080");
 
-builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
@@ -33,10 +32,7 @@ builder.Services.AddScoped<IActivityBusiness, ActivityBusiness>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+// OpenAPI is disabled for now to keep the .NET 8 build minimal on Render.
 
 app.UseCors("WebClientCors");
 app.MapControllers();
