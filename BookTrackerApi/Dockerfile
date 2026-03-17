@@ -2,6 +2,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY . .
+WORKDIR /src/BookTrackerApi
 RUN dotnet publish BookTrackerApi.csproj -c Release -o /app/publish
 
 # .NET runtime for hosting
