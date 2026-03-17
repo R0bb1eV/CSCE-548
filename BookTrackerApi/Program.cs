@@ -47,7 +47,7 @@ var app = builder.Build();
 // OpenAPI is disabled for now to keep the .NET 8 build minimal on Render.
 
 app.UseCors("WebClientCors");
-app.MapControllers();
+app.MapControllers().RequireCors("WebClientCors");
 app.MapGet("/", () => Results.Ok("BookTracker API is running."));
 app.MapGet("/api/ping", () => Results.Ok(new { status = "ok", supabaseConfigured = hasSupabaseConfig }));
 app.Run();
