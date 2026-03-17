@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+services:
+  - type: web
+    name: booktracker-api
+    runtime: docker
+    plan: free
+    region: oregon
+    rootDir: BookTrackerApi
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__BookTrackerDb
+        value: "__SUPABASE_CONNECTION_STRING__"
