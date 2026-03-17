@@ -9,5 +9,5 @@ RUN dotnet publish BookTrackerApi.csproj -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-ENV ASPNETCORE_URLS=http://+:${PORT}
-ENTRYPOINT ["dotnet", "BookTrackerApi.dll"]
+# Bind to Render's $PORT at runtime (fallback to 10000 for local Docker runs).
+ENTRYPOINT ["sh", "-c", "ASPNETCORE_URLS=http://+:${PORT:-10000} dotnet BookTrackerApi.dll"]
