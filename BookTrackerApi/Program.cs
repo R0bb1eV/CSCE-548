@@ -17,9 +17,27 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("WebClientCors", policy =>
     {
-        policy.AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
+        var allowedOriginsRaw = builder.Configuration["ALLOWED_ORIGINS"];
+        var allowedOrigins = string.IsNullOrWhiteSpace(allowedOriginsRaw)
+            ? Array.Empty<string>()
+            : allowedOriginsRaw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        if (allowedOrigins.Length == 0)
+        {
+            // Fallback for local development and default Vercel previews.
+            policy.SetIsOriginAllowed(origin =>
+                    origin.StartsWith("http://localhost", StringComparison.OrdinalIgnoreCase) ||
+                    origin.StartsWith("https://localhost", StringComparison.OrdinalIgnoreCase) ||
+                    origin.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase))
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        }
+        else
+        {
+            policy.WithOrigins(allowedOrigins)
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        }
     });
 });
 
