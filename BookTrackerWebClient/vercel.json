@@ -3,14 +3,17 @@
   "builds": [
     {
       "src": "wwwroot/**",
-      "use": "@vercel/static",
-      "config": {}
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
+      "src": "/",
+      "dest": "/wwwroot/index.html"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/$1"
+      "dest": "/wwwroot/$1"
     }
   ]
 }

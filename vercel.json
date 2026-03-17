@@ -9,8 +9,12 @@
   ],
   "routes": [
     {
+      "src": "/",
+      "dest": "/BookTrackerWebClient/wwwroot/index.html"
+    },
+    {
       "src": "/(.*)",
-      "dest": "BookTrackerWebClient/wwwroot/$1"
+      "dest": "/BookTrackerWebClient/wwwroot/$1"
     }
   ]
 }
