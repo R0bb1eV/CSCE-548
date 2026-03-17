@@ -64,7 +64,43 @@ var app = builder.Build();
 
 // OpenAPI is disabled for now to keep the .NET 8 build minimal on Render.
 
+bool IsAllowedOrigin(string origin, string[] allowedOrigins)
+{
+    if (allowedOrigins.Length == 0)
+    {
+        return origin.StartsWith("http://localhost", StringComparison.OrdinalIgnoreCase) ||
+               origin.StartsWith("https://localhost", StringComparison.OrdinalIgnoreCase) ||
+               origin.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase);
+    }
+
+    return allowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase);
+}
+
 app.UseRouting();
+app.Use(async (context, next) =>
+{
+    var origin = context.Request.Headers.Origin.ToString();
+    var allowedOriginsRaw = context.RequestServices.GetRequiredService<IConfiguration>()["ALLOWED_ORIGINS"];
+    var allowedOrigins = string.IsNullOrWhiteSpace(allowedOriginsRaw)
+        ? Array.Empty<string>()
+        : allowedOriginsRaw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+    if (!string.IsNullOrWhiteSpace(origin) && IsAllowedOrigin(origin, allowedOrigins))
+    {
+        context.Response.Headers["Access-Control-Allow-Origin"] = origin;
+        context.Response.Headers["Vary"] = "Origin";
+        context.Response.Headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS";
+        context.Response.Headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization";
+    }
+
+    if (context.Request.Method.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
+    {
+        context.Response.StatusCode = StatusCodes.Status204NoContent;
+        return;
+    }
+
+    await next();
+});
 app.UseCors("WebClientCors");
 app.MapControllers();
 app.MapGet("/", () => Results.Ok("BookTracker API is running."));
