@@ -55,7 +55,7 @@
       },
       "BookTracker/1.0.0": {
         "type": "project",
-        "framework": ".NETCoreApp,Version=v10.0",
+        "framework": ".NETCoreApp,Version=v8.0",
         "dependencies": {
           "Npgsql": "10.0.1"
         },
