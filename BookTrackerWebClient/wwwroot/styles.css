@@ -126,6 +126,8 @@ h1 {
 
 .crud .inline {
     gap: 0.7rem;
+    flex-direction: column;
+    align-items: stretch;
 }
 
 .divider {
@@ -151,6 +153,7 @@ input {
     background: var(--surface-soft);
     min-height: 42px;
     font-size: 0.95rem;
+    width: 100%;
 }
 
 textarea {
@@ -164,6 +167,7 @@ textarea {
     resize: vertical;
     font-family: "Consolas", "Courier New", monospace;
     font-size: 0.9rem;
+    width: 100%;
 }
 
 select {
@@ -176,6 +180,11 @@ select {
     color: var(--text);
     min-height: 42px;
     font-size: 0.95rem;
+    width: 100%;
+}
+
+.crud button {
+    width: 100%;
 }
 
 input:focus {
