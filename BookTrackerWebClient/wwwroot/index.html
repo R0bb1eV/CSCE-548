@@ -71,12 +71,32 @@
                 </div>
                 <div class="crud">
                     <div class="inline">
-                        <textarea data-role="create-json" placeholder='{"title":"Kindred","pageCount":264,"genre":"Sci-Fi","publishingHouse":"Beacon","yearOfRelease":1979,"isbn":"9780807083697","authorId":1}'></textarea>
+                        <input data-role="book-title" type="text" placeholder="Title" />
+                        <input data-role="book-genre" type="text" placeholder="Genre" />
+                        <input data-role="book-author-id" type="number" min="1" placeholder="Author ID" />
+                    </div>
+                    <div class="inline">
+                        <input data-role="book-page-count" type="number" min="1" placeholder="Page Count" />
+                        <input data-role="book-year" type="number" min="0" placeholder="Year of Release" />
+                        <input data-role="book-isbn" type="text" placeholder="ISBN" />
+                    </div>
+                    <div class="inline">
+                        <input data-role="book-publisher" type="text" placeholder="Publishing House" />
                         <button data-action="create">Create Book</button>
                     </div>
                     <div class="inline">
                         <input data-role="update-id" type="number" min="1" placeholder="Book ID to update" />
-                        <textarea data-role="update-json" placeholder='{"title":"Kindred","pageCount":264,"genre":"Historical","publishingHouse":"Beacon","yearOfRelease":1979,"isbn":"9780807083697","authorId":1}'></textarea>
+                        <input data-role="book-title-update" type="text" placeholder="Title" />
+                        <input data-role="book-genre-update" type="text" placeholder="Genre" />
+                    </div>
+                    <div class="inline">
+                        <input data-role="book-author-id-update" type="number" min="1" placeholder="Author ID" />
+                        <input data-role="book-page-count-update" type="number" min="1" placeholder="Page Count" />
+                        <input data-role="book-year-update" type="number" min="0" placeholder="Year of Release" />
+                    </div>
+                    <div class="inline">
+                        <input data-role="book-isbn-update" type="text" placeholder="ISBN" />
+                        <input data-role="book-publisher-update" type="text" placeholder="Publishing House" />
                         <button data-action="update">Update Book</button>
                     </div>
                 </div>

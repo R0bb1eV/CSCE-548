@@ -23,14 +23,11 @@ for (const panel of panels) {
     });
 
     panel.querySelector('[data-action="create"]').addEventListener("click", async (event) => {
-        const jsonText = panel.querySelector('[data-role="create-json"]').value.trim();
-        await runAction(event, output, () => handleCreate(entity, jsonText, output));
+        await runAction(event, output, () => handleCreate(entity, panel, output));
     });
 
     panel.querySelector('[data-action="update"]').addEventListener("click", async (event) => {
-        const idText = panel.querySelector('[data-role="update-id"]').value.trim();
-        const jsonText = panel.querySelector('[data-role="update-json"]').value.trim();
-        await runAction(event, output, () => handleUpdate(entity, idText, jsonText, output));
+        await runAction(event, output, () => handleUpdate(entity, panel, output));
     });
 }
 
@@ -174,8 +171,11 @@ async function handleGetSubset(entity, field, value, output) {
     renderTable(output, subset, response, `${subset.length} matching rows`);
 }
 
-async function handleCreate(entity, jsonText, output) {
-    const parsed = parseJsonInput(jsonText, output);
+async function handleCreate(entity, panel, output) {
+    const parsed = entity === "books"
+        ? collectBookPayload(panel, false, output)
+        : parseJsonInput(panel.querySelector('[data-role="create-json"]').value.trim(), output);
+
     if (!parsed.ok) {
         return;
     }
@@ -201,13 +201,17 @@ async function handleCreate(entity, jsonText, output) {
     renderMessage(output, "Created successfully.");
 }
 
-async function handleUpdate(entity, idText, jsonText, output) {
+async function handleUpdate(entity, panel, output) {
+    const idText = panel.querySelector('[data-role="update-id"]').value.trim();
     if (!idText) {
         renderMessage(output, "Please enter an ID to update.");
         return;
     }
 
-    const parsed = parseJsonInput(jsonText, output);
+    const parsed = entity === "books"
+        ? collectBookPayload(panel, true, output)
+        : parseJsonInput(panel.querySelector('[data-role="update-json"]').value.trim(), output);
+
     if (!parsed.ok) {
         return;
     }
@@ -304,6 +308,56 @@ function parseJsonInput(jsonText, output) {
         renderMessage(output, "Invalid JSON. Make sure it is valid JSON before submitting.");
         return { ok: false };
     }
+}
+
+function collectBookPayload(panel, isUpdate, output) {
+    const suffix = isUpdate ? "-update" : "";
+    const getValue = (role) => panel.querySelector(`[data-role="${role}${suffix}"]`)?.value.trim() ?? "";
+    const getNumber = (role) => {
+        const raw = getValue(role);
+        if (!raw) {
+            return null;
+        }
+        const value = Number(raw);
+        return Number.isFinite(value) ? value : null;
+    };
+
+    const title = getValue("book-title");
+    const genre = getValue("book-genre");
+    const publishingHouse = getValue("book-publisher");
+    const isbn = getValue("book-isbn");
+    const pageCount = getNumber("book-page-count");
+    const yearOfRelease = getNumber("book-year");
+    const authorId = getNumber("book-author-id");
+
+    const required = [
+        { key: "Title", value: title },
+        { key: "Genre", value: genre },
+        { key: "Publishing House", value: publishingHouse },
+        { key: "ISBN", value: isbn },
+        { key: "Page Count", value: pageCount },
+        { key: "Year of Release", value: yearOfRelease },
+        { key: "Author ID", value: authorId }
+    ];
+
+    const missing = required.filter((item) => item.value === null || item.value === "").map((item) => item.key);
+    if (missing.length > 0) {
+        renderMessage(output, `Please fill in: ${missing.join(", ")}.`);
+        return { ok: false };
+    }
+
+    return {
+        ok: true,
+        value: {
+            title,
+            pageCount,
+            genre,
+            publishingHouse,
+            yearOfRelease,
+            isbn,
+            authorId
+        }
+    };
 }
 
 function buildClientError(message) {
