@@ -312,7 +312,7 @@ namespace BookTracker
             var list = new List<JsonElement>();
             foreach (var item in doc.RootElement.EnumerateArray())
             {
-                list.Add(item);
+                list.Add(item.Clone());
             }
             return list;
         }
