@@ -24,9 +24,18 @@
         <section class="grid">
             <article class="panel" data-entity="authors">
                 <h2>Authors</h2>
-                <p class="panel-help">Load all authors from the database.</p>
+                <p class="panel-help">Load all authors, find one author, or filter the list.</p>
                 <div class="actions">
-                    <button data-action="all">Load Authors</button>
+                    <button data-action="all">Load All Authors</button>
+                    <div class="inline">
+                        <input data-role="id-input" type="number" min="1" placeholder="Author ID" />
+                        <button data-action="single">Find Author</button>
+                    </div>
+                    <div class="inline">
+                        <input data-role="filter-field" type="text" value="lastName" />
+                        <input data-role="filter-value" type="text" placeholder="Type to filter" />
+                        <button data-action="subset">Filter Authors</button>
+                    </div>
                 </div>
                 <div class="output" data-role="output">
                     <p class="output-empty">No data yet. Click “Load Authors”.</p>
@@ -35,9 +44,18 @@
 
             <article class="panel" data-entity="books">
                 <h2>Books</h2>
-                <p class="panel-help">Load the list of books and their details.</p>
+                <p class="panel-help">Load all books, find one book, or filter the list.</p>
                 <div class="actions">
-                    <button data-action="all">Load Books</button>
+                    <button data-action="all">Load All Books</button>
+                    <div class="inline">
+                        <input data-role="id-input" type="number" min="1" placeholder="Book ID" />
+                        <button data-action="single">Find Book</button>
+                    </div>
+                    <div class="inline">
+                        <input data-role="filter-field" type="text" value="genre" />
+                        <input data-role="filter-value" type="text" placeholder="Type to filter" />
+                        <button data-action="subset">Filter Books</button>
+                    </div>
                 </div>
                 <div class="output" data-role="output">
                     <p class="output-empty">No data yet. Click “Load Books”.</p>
@@ -46,9 +64,18 @@
 
             <article class="panel" data-entity="users">
                 <h2>Users</h2>
-                <p class="panel-help">Load all registered users.</p>
+                <p class="panel-help">Load all users, find one user, or filter the list.</p>
                 <div class="actions">
-                    <button data-action="all">Load Users</button>
+                    <button data-action="all">Load All Users</button>
+                    <div class="inline">
+                        <input data-role="id-input" type="number" min="1" placeholder="User ID" />
+                        <button data-action="single">Find User</button>
+                    </div>
+                    <div class="inline">
+                        <input data-role="filter-field" type="text" value="username" />
+                        <input data-role="filter-value" type="text" placeholder="Type to filter" />
+                        <button data-action="subset">Filter Users</button>
+                    </div>
                 </div>
                 <div class="output" data-role="output">
                     <p class="output-empty">No data yet. Click “Load Users”.</p>
@@ -57,9 +84,18 @@
 
             <article class="panel" data-entity="activities">
                 <h2>Activities</h2>
-                <p class="panel-help">Load reading activities for all users.</p>
+                <p class="panel-help">Load all activities, find one activity, or filter the list.</p>
                 <div class="actions">
-                    <button data-action="all">Load Activities</button>
+                    <button data-action="all">Load All Activities</button>
+                    <div class="inline">
+                        <input data-role="id-input" type="number" min="1" placeholder="Activity ID" />
+                        <button data-action="single">Find Activity</button>
+                    </div>
+                    <div class="inline">
+                        <input data-role="filter-field" type="text" value="bookStatus" />
+                        <input data-role="filter-value" type="text" placeholder="Type to filter" />
+                        <button data-action="subset">Filter Activities</button>
+                    </div>
                 </div>
                 <div class="output" data-role="output">
                     <p class="output-empty">No data yet. Click “Load Activities”.</p>

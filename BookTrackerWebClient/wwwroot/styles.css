@@ -117,6 +117,12 @@ h1 {
     gap: 0.55rem;
 }
 
+.inline {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
 input {
     min-width: 0;
     flex: 1;
@@ -229,5 +235,13 @@ button:hover {
 
     .panel {
         padding: 0.85rem;
+    }
+
+    .inline {
+        flex-direction: column;
+    }
+
+    .inline button {
+        width: 100%;
     }
 }

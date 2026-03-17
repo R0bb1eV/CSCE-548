@@ -10,6 +10,17 @@ for (const panel of panels) {
     panel.querySelector('[data-action="all"]').addEventListener("click", async (event) => {
         await runAction(event, output, () => handleGetAll(entity, output));
     });
+
+    panel.querySelector('[data-action="single"]').addEventListener("click", async (event) => {
+        const idText = panel.querySelector('[data-role="id-input"]').value.trim();
+        await runAction(event, output, () => handleGetSingle(entity, idText, output));
+    });
+
+    panel.querySelector('[data-action="subset"]').addEventListener("click", async (event) => {
+        const field = panel.querySelector('[data-role="filter-field"]').value.trim();
+        const value = panel.querySelector('[data-role="filter-value"]').value.trim();
+        await runAction(event, output, () => handleGetSubset(entity, field, value, output));
+    });
 }
 
 function initializeApiBaseUrl(input) {
@@ -66,6 +77,67 @@ async function handleGetAll(entity, output) {
     }
 
     renderTable(output, response.body, response);
+}
+
+async function handleGetSingle(entity, idText, output) {
+    if (!idText) {
+        renderMessage(output, "Please enter an ID first.");
+        return;
+    }
+
+    renderMessage(output, `Finding ${toTitle(entity)} #${idText}...`);
+
+    const response = await apiRequest({
+        method: "GET",
+        path: `/api/${entity}/${encodeURIComponent(idText)}`
+    });
+
+    if (!response.ok) {
+        renderError(output, response);
+        return;
+    }
+
+    if (response.body && typeof response.body === "object") {
+        renderTable(output, Array.isArray(response.body) ? response.body : [response.body], response);
+        return;
+    }
+
+    renderMessage(output, "The API did not return a record for that ID.");
+}
+
+async function handleGetSubset(entity, field, value, output) {
+    if (!field || !value) {
+        renderMessage(output, "Please enter a field name and a filter value.");
+        return;
+    }
+
+    renderMessage(output, `Filtering ${toTitle(entity)} by ${field}...`);
+
+    const response = await apiRequest({
+        method: "GET",
+        path: `/api/${entity}`
+    });
+
+    if (!response.ok) {
+        renderError(output, response);
+        return;
+    }
+
+    if (!Array.isArray(response.body)) {
+        renderMessage(output, "The API did not return a list for filtering.");
+        return;
+    }
+
+    const subset = response.body.filter((row) => {
+        const fieldValue = getCaseInsensitivePropertyValue(row, field);
+        if (fieldValue === undefined || fieldValue === null) {
+            return false;
+        }
+
+        return String(fieldValue).toLowerCase().includes(value.toLowerCase());
+    });
+
+    renderTable(output, subset, response, `${subset.length} matching rows`);
 }
 
 function toTitle(value) {
@@ -193,12 +265,14 @@ function renderError(output, response) {
     output.appendChild(card);
 }
 
-function renderTable(output, rows, response) {
+function renderTable(output, rows, response, overrideHeader) {
     output.innerHTML = "";
 
     const header = document.createElement("div");
     header.className = "output-header";
-    header.textContent = `Loaded ${rows.length} rows in ${response.durationMs} ms.`;
+    header.textContent = overrideHeader
+        ? `${overrideHeader} in ${response.durationMs} ms.`
+        : `Loaded ${rows.length} rows in ${response.durationMs} ms.`;
     output.appendChild(header);
 
     if (rows.length === 0) {
@@ -244,6 +318,11 @@ function buildColumnList(rows) {
         }
     }
     return Array.from(keys);
+}
+
+function getCaseInsensitivePropertyValue(obj, key) {
+    const match = Object.keys(obj).find((k) => k.toLowerCase() === key.toLowerCase());
+    return match ? obj[match] : undefined;
 }
 
 function prettifyColumnName(name) {
