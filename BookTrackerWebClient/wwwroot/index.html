@@ -38,14 +38,22 @@
                         <button data-action="subset">Filter Authors</button>
                     </div>
                 </div>
+                <div class="divider"></div>
                 <div class="crud">
                     <div class="inline">
-                        <textarea data-role="create-json" placeholder='{"firstName":"Octavia","lastName":"Butler","birthYear":1947}'></textarea>
+                        <input data-role="author-first-name" type="text" placeholder="First Name" />
+                        <input data-role="author-middle-name" type="text" placeholder="Middle Name (optional)" />
+                        <input data-role="author-last-name" type="text" placeholder="Last Name" />
+                        <input data-role="author-birth-year" type="number" min="0" placeholder="Birth Year" />
                         <button data-action="create">Create Author</button>
                     </div>
+                    <div class="divider"></div>
                     <div class="inline">
                         <input data-role="update-id" type="number" min="1" placeholder="Author ID to update" />
-                        <textarea data-role="update-json" placeholder='{"firstName":"Octavia","lastName":"Butler","birthYear":1948}'></textarea>
+                        <input data-role="author-first-name-update" type="text" placeholder="First Name" />
+                        <input data-role="author-middle-name-update" type="text" placeholder="Middle Name (optional)" />
+                        <input data-role="author-last-name-update" type="text" placeholder="Last Name" />
+                        <input data-role="author-birth-year-update" type="number" min="0" placeholder="Birth Year" />
                         <button data-action="update">Update Author</button>
                     </div>
                 </div>
@@ -69,6 +77,7 @@
                         <button data-action="subset">Filter Books</button>
                     </div>
                 </div>
+                <div class="divider"></div>
                 <div class="crud">
                     <div class="inline">
                         <input data-role="book-title" type="text" placeholder="Title" />
@@ -84,6 +93,7 @@
                         <input data-role="book-publisher" type="text" placeholder="Publishing House" />
                         <button data-action="create">Create Book</button>
                     </div>
+                    <div class="divider"></div>
                     <div class="inline">
                         <input data-role="update-id" type="number" min="1" placeholder="Book ID to update" />
                         <input data-role="book-title-update" type="text" placeholder="Title" />
@@ -120,14 +130,22 @@
                         <button data-action="subset">Filter Users</button>
                     </div>
                 </div>
+                <div class="divider"></div>
                 <div class="crud">
                     <div class="inline">
-                        <textarea data-role="create-json" placeholder='{"username":"reader01","email":"reader01@example.com","dob":"1997-04-12","accountCreationDate":"2024-10-01"}'></textarea>
+                        <input data-role="user-username" type="text" placeholder="Username" />
+                        <input data-role="user-email" type="email" placeholder="Email" />
+                        <input data-role="user-dob" type="date" placeholder="Date of Birth" />
+                        <input data-role="user-account-date" type="date" placeholder="Account Creation Date" />
                         <button data-action="create">Create User</button>
                     </div>
+                    <div class="divider"></div>
                     <div class="inline">
                         <input data-role="update-id" type="number" min="1" placeholder="User ID to update" />
-                        <textarea data-role="update-json" placeholder='{"username":"reader01","email":"reader01@example.com","dob":"1997-04-12","accountCreationDate":"2024-10-01"}'></textarea>
+                        <input data-role="user-username-update" type="text" placeholder="Username" />
+                        <input data-role="user-email-update" type="email" placeholder="Email" />
+                        <input data-role="user-dob-update" type="date" placeholder="Date of Birth" />
+                        <input data-role="user-account-date-update" type="date" placeholder="Account Creation Date" />
                         <button data-action="update">Update User</button>
                     </div>
                 </div>
@@ -151,15 +169,43 @@
                         <button data-action="subset">Filter Activities</button>
                     </div>
                 </div>
+                <div class="divider"></div>
                 <div class="crud">
                     <div class="inline">
-                        <textarea data-role="create-json" placeholder='{"userId":1,"bookId":2,"bookStatus":"reading","progressCompleted":25,"startDate":"2025-02-10","endDate":null}'></textarea>
+                        <input data-role="activity-user-id" type="number" min="1" placeholder="User ID" />
+                        <input data-role="activity-book-id" type="number" min="1" placeholder="Book ID" />
+                        <select data-role="activity-status">
+                            <option value="" selected disabled>Status</option>
+                            <option value="onreadlist">On Read List</option>
+                            <option value="reading">Reading</option>
+                            <option value="completed">Completed</option>
+                            <option value="dropped">Dropped</option>
+                        </select>
+                        <input data-role="activity-progress" type="number" min="0" max="100" placeholder="Progress %" />
                         <button data-action="create">Create Activity</button>
                     </div>
                     <div class="inline">
+                        <input data-role="activity-start-date" type="date" placeholder="Start Date" />
+                        <input data-role="activity-end-date" type="date" placeholder="End Date (optional)" />
+                    </div>
+                    <div class="divider"></div>
+                    <div class="inline">
                         <input data-role="update-id" type="number" min="1" placeholder="Activity ID to update" />
-                        <textarea data-role="update-json" placeholder='{"userId":1,"bookId":2,"bookStatus":"completed","progressCompleted":100,"startDate":"2025-02-10","endDate":"2025-03-01"}'></textarea>
+                        <input data-role="activity-user-id-update" type="number" min="1" placeholder="User ID" />
+                        <input data-role="activity-book-id-update" type="number" min="1" placeholder="Book ID" />
+                        <select data-role="activity-status-update">
+                            <option value="" selected disabled>Status</option>
+                            <option value="onreadlist">On Read List</option>
+                            <option value="reading">Reading</option>
+                            <option value="completed">Completed</option>
+                            <option value="dropped">Dropped</option>
+                        </select>
+                        <input data-role="activity-progress-update" type="number" min="0" max="100" placeholder="Progress %" />
                         <button data-action="update">Update Activity</button>
+                    </div>
+                    <div class="inline">
+                        <input data-role="activity-start-date-update" type="date" placeholder="Start Date" />
+                        <input data-role="activity-end-date-update" type="date" placeholder="End Date (optional)" />
                     </div>
                 </div>
                 <div class="output" data-role="output">
