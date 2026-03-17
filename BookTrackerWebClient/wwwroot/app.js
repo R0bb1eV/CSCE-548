@@ -256,7 +256,7 @@ async function apiRequest({ method, path, body }) {
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
     const startedAt = performance.now();
 
     try {
@@ -490,8 +490,8 @@ function normalizeNetworkError(error, context) {
             status: 0,
             ...context,
             body: {
-                message: "Request timed out after 12 seconds.",
-                hint: "Check that the API is running and the base URL is correct."
+                message: "Request timed out after 25 seconds.",
+                hint: "The API may be cold-starting. Retry in a few seconds or confirm the base URL."
             }
         };
     }
