@@ -7,8 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Hosting notes:
 // Platform: ASP.NET Core Web API hosted by Kestrel on local machine.
 // Run command: dotnet run --project .\BookTrackerApi\BookTrackerApi.csproj
-// Service URL: http://localhost:5080
-builder.WebHost.UseUrls("http://localhost:5080");
+// Service URL: http://localhost:5080 (local default)
+//
+// Render binds to the PORT environment variable via ASPNETCORE_URLS in the Dockerfile.
+// We should not hard-code a URL here.
 
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
