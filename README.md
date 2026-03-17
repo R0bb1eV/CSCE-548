@@ -46,5 +46,5 @@ See `DEPLOYMENT.md`.
 ## Screenshots
 - GET All Items: `img/image.png`
 - GET Single Items: `img/image4.png`
-- Create: `img/image2.png`
-- Update: `img/image3.png`
+- Create: `img/image2.png`, `img/image2-2.png`, `img/image2-3.png`,`img/image2-4.png` 
+- Update: `img/image3.png`, `img/image3-2.png`, `img/image3-3.png`, `img/image3-4.png`
