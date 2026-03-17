@@ -41,11 +41,11 @@ namespace BookTracker
             {
                 list.Add(new Author
                 {
-                    AuthorId = reader.GetInt32("author_id"),
-                    FirstName = reader.GetString("first_name"),
-                    MiddleName = reader.IsDBNull(reader.GetOrdinal("middle_name")) ? null : reader.GetString("middle_name"),
-                    LastName = reader.GetString("last_name"),
-                    BirthYear = reader.GetInt32("birth_year")
+                    AuthorId = GetInt32(reader, "author_id"),
+                    FirstName = GetString(reader, "first_name"),
+                    MiddleName = IsNull(reader, "middle_name") ? null : GetString(reader, "middle_name"),
+                    LastName = GetString(reader, "last_name"),
+                    BirthYear = GetInt32(reader, "birth_year")
                 });
             }
             return list;
@@ -63,11 +63,11 @@ namespace BookTracker
             {
                 return new Author
                 {
-                    AuthorId = reader.GetInt32("author_id"),
-                    FirstName = reader.GetString("first_name"),
-                    MiddleName = reader.IsDBNull(reader.GetOrdinal("middle_name")) ? null : reader.GetString("middle_name"),
-                    LastName = reader.GetString("last_name"),
-                    BirthYear = reader.GetInt32("birth_year")
+                    AuthorId = GetInt32(reader, "author_id"),
+                    FirstName = GetString(reader, "first_name"),
+                    MiddleName = IsNull(reader, "middle_name") ? null : GetString(reader, "middle_name"),
+                    LastName = GetString(reader, "last_name"),
+                    BirthYear = GetInt32(reader, "birth_year")
                 };
             }
             return null;
@@ -128,14 +128,14 @@ namespace BookTracker
             {
                 books.Add(new Book
                 {
-                    ID = reader.GetInt32("id"),
-                    Title = reader.GetString("title"),
-                    PageCount = reader.GetInt32("page_count"),
-                    Genre = reader.GetString("genre"),
-                    PublishingHouse = reader.GetString("publishing_house"),
-                    YearOfRelease = reader.GetInt32("year_of_release"),
-                    ISBN = reader.GetString("isbn"),
-                    AuthorId = reader.GetInt32("author_id")
+                    ID = GetInt32(reader, "id"),
+                    Title = GetString(reader, "title"),
+                    PageCount = GetInt32(reader, "page_count"),
+                    Genre = GetString(reader, "genre"),
+                    PublishingHouse = GetString(reader, "publishing_house"),
+                    YearOfRelease = GetInt32(reader, "year_of_release"),
+                    ISBN = GetString(reader, "isbn"),
+                    AuthorId = GetInt32(reader, "author_id")
                 });
             }
             return books;
@@ -153,14 +153,14 @@ namespace BookTracker
             {
                 return new Book
                 {
-                    ID = reader.GetInt32("id"),
-                    Title = reader.GetString("title"),
-                    PageCount = reader.GetInt32("page_count"),
-                    Genre = reader.GetString("genre"),
-                    PublishingHouse = reader.GetString("publishing_house"),
-                    YearOfRelease = reader.GetInt32("year_of_release"),
-                    ISBN = reader.GetString("isbn"),
-                    AuthorId = reader.GetInt32("author_id")
+                    ID = GetInt32(reader, "id"),
+                    Title = GetString(reader, "title"),
+                    PageCount = GetInt32(reader, "page_count"),
+                    Genre = GetString(reader, "genre"),
+                    PublishingHouse = GetString(reader, "publishing_house"),
+                    YearOfRelease = GetInt32(reader, "year_of_release"),
+                    ISBN = GetString(reader, "isbn"),
+                    AuthorId = GetInt32(reader, "author_id")
                 };
             }
             return null;
@@ -221,11 +221,11 @@ namespace BookTracker
             {
                 list.Add(new User
                 {
-                    UserId = reader.GetInt32("user_id"),
-                    Username = reader.GetString("username"),
-                    Email = reader.GetString("email"),
-                    DOB = reader.GetDateTime("dob"),
-                    AccountCreationDate = reader.GetDateTime("account_creation_date")
+                    UserId = GetInt32(reader, "user_id"),
+                    Username = GetString(reader, "username"),
+                    Email = GetString(reader, "email"),
+                    DOB = GetDateTime(reader, "dob"),
+                    AccountCreationDate = GetDateTime(reader, "account_creation_date")
                 });
             }
             return list;
@@ -243,11 +243,11 @@ namespace BookTracker
             {
                 return new User
                 {
-                    UserId = reader.GetInt32("user_id"),
-                    Username = reader.GetString("username"),
-                    Email = reader.GetString("email"),
-                    DOB = reader.GetDateTime("dob"),
-                    AccountCreationDate = reader.GetDateTime("account_creation_date")
+                    UserId = GetInt32(reader, "user_id"),
+                    Username = GetString(reader, "username"),
+                    Email = GetString(reader, "email"),
+                    DOB = GetDateTime(reader, "dob"),
+                    AccountCreationDate = GetDateTime(reader, "account_creation_date")
                 };
             }
             return null;
@@ -307,13 +307,13 @@ namespace BookTracker
             {
                 list.Add(new Activity
                 {
-                    ActivityId = reader.GetInt32("activity_id"),
-                    UserId = reader.GetInt32("user_id"),
-                    BookId = reader.GetInt32("book_id"),
-                    BookStatus = reader.GetString("book_status"),
-                    ProgressCompleted = reader.GetInt32("progress_completed"),
-                    StartDate = reader.IsDBNull(reader.GetOrdinal("start_date")) ? null : reader.GetDateTime("start_date"),
-                    EndDate = reader.IsDBNull(reader.GetOrdinal("end_date")) ? null : reader.GetDateTime("end_date")
+                    ActivityId = GetInt32(reader, "activity_id"),
+                    UserId = GetInt32(reader, "user_id"),
+                    BookId = GetInt32(reader, "book_id"),
+                    BookStatus = GetString(reader, "book_status"),
+                    ProgressCompleted = GetInt32(reader, "progress_completed"),
+                    StartDate = IsNull(reader, "start_date") ? null : GetDateTime(reader, "start_date"),
+                    EndDate = IsNull(reader, "end_date") ? null : GetDateTime(reader, "end_date")
                 });
             }
             return list;
@@ -331,13 +331,13 @@ namespace BookTracker
             {
                 return new Activity
                 {
-                    ActivityId = reader.GetInt32("activity_id"),
-                    UserId = reader.GetInt32("user_id"),
-                    BookId = reader.GetInt32("book_id"),
-                    BookStatus = reader.GetString("book_status"),
-                    ProgressCompleted = reader.GetInt32("progress_completed"),
-                    StartDate = reader.IsDBNull(reader.GetOrdinal("start_date")) ? null : reader.GetDateTime("start_date"),
-                    EndDate = reader.IsDBNull(reader.GetOrdinal("end_date")) ? null : reader.GetDateTime("end_date")
+                    ActivityId = GetInt32(reader, "activity_id"),
+                    UserId = GetInt32(reader, "user_id"),
+                    BookId = GetInt32(reader, "book_id"),
+                    BookStatus = GetString(reader, "book_status"),
+                    ProgressCompleted = GetInt32(reader, "progress_completed"),
+                    StartDate = IsNull(reader, "start_date") ? null : GetDateTime(reader, "start_date"),
+                    EndDate = IsNull(reader, "end_date") ? null : GetDateTime(reader, "end_date")
                 };
             }
             return null;
@@ -367,6 +367,26 @@ namespace BookTracker
             using var cmd = new NpgsqlCommand(query, conn);
             cmd.Parameters.AddWithValue("@Id", id);
             cmd.ExecuteNonQuery();
+        }
+
+        private static int GetInt32(NpgsqlDataReader reader, string column)
+        {
+            return reader.GetInt32(reader.GetOrdinal(column));
+        }
+
+        private static string GetString(NpgsqlDataReader reader, string column)
+        {
+            return reader.GetString(reader.GetOrdinal(column));
+        }
+
+        private static DateTime GetDateTime(NpgsqlDataReader reader, string column)
+        {
+            return reader.GetDateTime(reader.GetOrdinal(column));
+        }
+
+        private static bool IsNull(NpgsqlDataReader reader, string column)
+        {
+            return reader.IsDBNull(reader.GetOrdinal(column));
         }
     }
 }
