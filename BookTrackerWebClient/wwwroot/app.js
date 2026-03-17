@@ -21,6 +21,17 @@ for (const panel of panels) {
         const value = panel.querySelector('[data-role="filter-value"]').value.trim();
         await runAction(event, output, () => handleGetSubset(entity, field, value, output));
     });
+
+    panel.querySelector('[data-action="create"]').addEventListener("click", async (event) => {
+        const jsonText = panel.querySelector('[data-role="create-json"]').value.trim();
+        await runAction(event, output, () => handleCreate(entity, jsonText, output));
+    });
+
+    panel.querySelector('[data-action="update"]').addEventListener("click", async (event) => {
+        const idText = panel.querySelector('[data-role="update-id"]').value.trim();
+        const jsonText = panel.querySelector('[data-role="update-json"]').value.trim();
+        await runAction(event, output, () => handleUpdate(entity, idText, jsonText, output));
+    });
 }
 
 function getEnvApiBaseUrl() {
@@ -163,11 +174,75 @@ async function handleGetSubset(entity, field, value, output) {
     renderTable(output, subset, response, `${subset.length} matching rows`);
 }
 
+async function handleCreate(entity, jsonText, output) {
+    const parsed = parseJsonInput(jsonText, output);
+    if (!parsed.ok) {
+        return;
+    }
+
+    renderMessage(output, `Creating ${toTitle(entity)}...`);
+
+    const response = await apiRequest({
+        method: "POST",
+        path: `/api/${entity}`,
+        body: parsed.value
+    });
+
+    if (!response.ok) {
+        renderError(output, response);
+        return;
+    }
+
+    if (response.body && typeof response.body === "object") {
+        renderTable(output, Array.isArray(response.body) ? response.body : [response.body], response, "Created");
+        return;
+    }
+
+    renderMessage(output, "Created successfully.");
+}
+
+async function handleUpdate(entity, idText, jsonText, output) {
+    if (!idText) {
+        renderMessage(output, "Please enter an ID to update.");
+        return;
+    }
+
+    const parsed = parseJsonInput(jsonText, output);
+    if (!parsed.ok) {
+        return;
+    }
+
+    renderMessage(output, `Updating ${toTitle(entity)} #${idText}...`);
+
+    const response = await apiRequest({
+        method: "PUT",
+        path: `/api/${entity}/${encodeURIComponent(idText)}`,
+        body: parsed.value
+    });
+
+    if (!response.ok) {
+        renderError(output, response);
+        return;
+    }
+
+    if (response.status === 204) {
+        renderMessage(output, `Updated ${toTitle(entity)} #${idText}.`);
+        return;
+    }
+
+    if (response.body && typeof response.body === "object") {
+        renderTable(output, Array.isArray(response.body) ? response.body : [response.body], response, "Updated");
+        return;
+    }
+
+    renderMessage(output, `Updated ${toTitle(entity)} #${idText}.`);
+}
+
 function toTitle(value) {
     return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-async function apiRequest({ method, path }) {
+async function apiRequest({ method, path, body }) {
     const baseUrl = getApiBaseUrl();
     if (!baseUrl) {
         return buildClientError("API Base URL is required.");
@@ -187,7 +262,9 @@ async function apiRequest({ method, path }) {
     try {
         const response = await fetch(url, {
             method,
-            signal: controller.signal
+            signal: controller.signal,
+            headers: body ? { "Content-Type": "application/json" } : undefined,
+            body: body ? JSON.stringify(body) : undefined
         });
 
         const durationMs = Math.round(performance.now() - startedAt);
@@ -207,6 +284,25 @@ async function apiRequest({ method, path }) {
         return normalizeNetworkError(error, { url, method, durationMs });
     } finally {
         clearTimeout(timeoutId);
+    }
+}
+
+function parseJsonInput(jsonText, output) {
+    if (!jsonText) {
+        renderMessage(output, "Please enter a JSON body first.");
+        return { ok: false };
+    }
+
+    try {
+        const value = JSON.parse(jsonText);
+        if (!value || typeof value !== "object" || Array.isArray(value)) {
+            renderMessage(output, "JSON body must be an object (no arrays).");
+            return { ok: false };
+        }
+        return { ok: true, value };
+    } catch {
+        renderMessage(output, "Invalid JSON. Make sure it is valid JSON before submitting.");
+        return { ok: false };
     }
 }
 

@@ -38,6 +38,17 @@
                         <button data-action="subset">Filter Authors</button>
                     </div>
                 </div>
+                <div class="crud">
+                    <div class="inline">
+                        <textarea data-role="create-json" placeholder='{"firstName":"Octavia","lastName":"Butler","birthYear":1947}'></textarea>
+                        <button data-action="create">Create Author</button>
+                    </div>
+                    <div class="inline">
+                        <input data-role="update-id" type="number" min="1" placeholder="Author ID to update" />
+                        <textarea data-role="update-json" placeholder='{"firstName":"Octavia","lastName":"Butler","birthYear":1948}'></textarea>
+                        <button data-action="update">Update Author</button>
+                    </div>
+                </div>
                 <div class="output" data-role="output">
                     <p class="output-empty">No data yet. Click “Load Authors”.</p>
                 </div>
@@ -56,6 +67,17 @@
                         <input data-role="filter-field" type="text" value="genre" />
                         <input data-role="filter-value" type="text" placeholder="Type to filter" />
                         <button data-action="subset">Filter Books</button>
+                    </div>
+                </div>
+                <div class="crud">
+                    <div class="inline">
+                        <textarea data-role="create-json" placeholder='{"title":"Kindred","pageCount":264,"genre":"Sci-Fi","publishingHouse":"Beacon","yearOfRelease":1979,"isbn":"9780807083697","authorId":1}'></textarea>
+                        <button data-action="create">Create Book</button>
+                    </div>
+                    <div class="inline">
+                        <input data-role="update-id" type="number" min="1" placeholder="Book ID to update" />
+                        <textarea data-role="update-json" placeholder='{"title":"Kindred","pageCount":264,"genre":"Historical","publishingHouse":"Beacon","yearOfRelease":1979,"isbn":"9780807083697","authorId":1}'></textarea>
+                        <button data-action="update">Update Book</button>
                     </div>
                 </div>
                 <div class="output" data-role="output">
@@ -78,6 +100,17 @@
                         <button data-action="subset">Filter Users</button>
                     </div>
                 </div>
+                <div class="crud">
+                    <div class="inline">
+                        <textarea data-role="create-json" placeholder='{"username":"reader01","email":"reader01@example.com","dob":"1997-04-12","accountCreationDate":"2024-10-01"}'></textarea>
+                        <button data-action="create">Create User</button>
+                    </div>
+                    <div class="inline">
+                        <input data-role="update-id" type="number" min="1" placeholder="User ID to update" />
+                        <textarea data-role="update-json" placeholder='{"username":"reader01","email":"reader01@example.com","dob":"1997-04-12","accountCreationDate":"2024-10-01"}'></textarea>
+                        <button data-action="update">Update User</button>
+                    </div>
+                </div>
                 <div class="output" data-role="output">
                     <p class="output-empty">No data yet. Click “Load Users”.</p>
                 </div>
@@ -96,6 +129,17 @@
                         <input data-role="filter-field" type="text" value="bookStatus" />
                         <input data-role="filter-value" type="text" placeholder="Type to filter" />
                         <button data-action="subset">Filter Activities</button>
+                    </div>
+                </div>
+                <div class="crud">
+                    <div class="inline">
+                        <textarea data-role="create-json" placeholder='{"userId":1,"bookId":2,"bookStatus":"reading","progressCompleted":25,"startDate":"2025-02-10","endDate":null}'></textarea>
+                        <button data-action="create">Create Activity</button>
+                    </div>
+                    <div class="inline">
+                        <input data-role="update-id" type="number" min="1" placeholder="Activity ID to update" />
+                        <textarea data-role="update-json" placeholder='{"userId":1,"bookId":2,"bookStatus":"completed","progressCompleted":100,"startDate":"2025-02-10","endDate":"2025-03-01"}'></textarea>
+                        <button data-action="update">Update Activity</button>
                     </div>
                 </div>
                 <div class="output" data-role="output">
