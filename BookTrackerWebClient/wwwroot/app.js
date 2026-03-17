@@ -1,172 +1,155 @@
 const panels = document.querySelectorAll(".panel");
+const apiBaseUrlInput = document.getElementById("apiBaseUrl");
+
+initializeApiBaseUrl(apiBaseUrlInput);
 
 for (const panel of panels) {
     const entity = panel.dataset.entity;
     const output = panel.querySelector('[data-role="output"]');
 
-    panel.querySelector('[data-action="all"]').addEventListener("click", async () => {
-        await handleGetAll(entity, output);
+    panel.querySelector('[data-action="all"]').addEventListener("click", async (event) => {
+        await runAction(event, output, () => handleGetAll(entity, output));
     });
+}
 
-    panel.querySelector('[data-action="single"]').addEventListener("click", async () => {
-        const idText = panel.querySelector('[data-role="id-input"]').value.trim();
-        await handleGetById(entity, idText, output);
-    });
+function initializeApiBaseUrl(input) {
+    const cached = localStorage.getItem("apiBaseUrl");
+    if (cached) {
+        input.value = cached;
+    }
 
-    panel.querySelector('[data-action="subset"]').addEventListener("click", async () => {
-        const field = panel.querySelector('[data-role="filter-field"]').value.trim();
-        const value = panel.querySelector('[data-role="filter-value"]').value.trim();
-        await handleGetSubset(entity, field, value, output);
+    input.addEventListener("change", () => {
+        const cleaned = normalizeBaseUrl(input.value);
+        input.value = cleaned;
+        localStorage.setItem("apiBaseUrl", cleaned);
     });
+}
 
-    panel.querySelector('[data-action="create"]').addEventListener("click", async () => {
-        const jsonText = panel.querySelector('[data-role="create-json"]').value.trim();
-        await handleCreate(entity, jsonText, output);
-    });
-
-    panel.querySelector('[data-action="update"]').addEventListener("click", async () => {
-        const idText = panel.querySelector('[data-role="update-id"]').value.trim();
-        const jsonText = panel.querySelector('[data-role="update-json"]').value.trim();
-        await handleUpdate(entity, idText, jsonText, output);
-    });
-
-    panel.querySelector('[data-action="delete"]').addEventListener("click", async () => {
-        const idText = panel.querySelector('[data-role="delete-id"]').value.trim();
-        await handleDelete(entity, idText, output);
-    });
+function normalizeBaseUrl(value) {
+    return value.trim().replace(/\/$/, "");
 }
 
 function getApiBaseUrl() {
-    return document.getElementById("apiBaseUrl").value.trim().replace(/\/$/, "");
+    return normalizeBaseUrl(apiBaseUrlInput.value);
+}
+
+async function runAction(event, output, action) {
+    const button = event.currentTarget;
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Loading...";
+
+    try {
+        await action();
+    } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+    }
 }
 
 async function handleGetAll(entity, output) {
-    try {
-        setOutput(output, `Loading all ${entity}...`);
-        const response = await fetch(`${getApiBaseUrl()}/api/${entity}`);
-        await writeResponse(output, response);
-    } catch (error) {
-        setOutput(output, `Request failed: ${error}`);
-    }
-}
+    renderMessage(output, `Loading ${toTitle(entity)}...`);
 
-async function handleGetById(entity, idText, output) {
-    if (!idText) {
-        setOutput(output, "Provide an id value.");
+    const response = await apiRequest({
+        method: "GET",
+        path: `/api/${entity}`
+    });
+
+    if (!response.ok) {
+        renderError(output, response);
         return;
     }
 
-    try {
-        setOutput(output, `Loading ${entity} id=${idText}...`);
-        const response = await fetch(`${getApiBaseUrl()}/api/${entity}/${encodeURIComponent(idText)}`);
-        await writeResponse(output, response);
-    } catch (error) {
-        setOutput(output, `Request failed: ${error}`);
-    }
-}
-
-async function handleGetSubset(entity, field, value, output) {
-    if (!field || !value) {
-        setOutput(output, "Provide filter field and value.");
+    if (!Array.isArray(response.body)) {
+        renderMessage(output, "The API did not return a list. Please check the server.");
         return;
     }
 
+    renderTable(output, response.body, response);
+}
+
+function toTitle(value) {
+    return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+async function apiRequest({ method, path }) {
+    const baseUrl = getApiBaseUrl();
+    if (!baseUrl) {
+        return buildClientError("API Base URL is required.");
+    }
+
+    let url;
     try {
-        setOutput(output, `Loading subset from ${entity} where ${field} includes "${value}"...`);
-        const response = await fetch(`${getApiBaseUrl()}/api/${entity}`);
-        if (!response.ok) {
-            await writeResponse(output, response);
-            return;
-        }
+        url = new URL(baseUrl + path).toString();
+    } catch {
+        return buildClientError(`Invalid API Base URL: "${baseUrl}".`);
+    }
 
-        const rows = await response.json();
-        const subset = rows.filter((row) => {
-            const fieldValue = getCaseInsensitivePropertyValue(row, field);
-            if (fieldValue === undefined || fieldValue === null) {
-                return false;
-            }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    const startedAt = performance.now();
 
-            return String(fieldValue).toLowerCase().includes(value.toLowerCase());
+    try {
+        const response = await fetch(url, {
+            method,
+            signal: controller.signal
         });
 
-        setOutput(output, JSON.stringify(subset, null, 2));
+        const durationMs = Math.round(performance.now() - startedAt);
+        const text = await response.text();
+        const parsed = tryParseJson(text);
+
+        return {
+            ok: response.ok,
+            status: response.status,
+            url,
+            method,
+            durationMs,
+            body: parsed.ok ? parsed.value : text
+        };
     } catch (error) {
-        setOutput(output, `Request failed: ${error}`);
+        const durationMs = Math.round(performance.now() - startedAt);
+        return normalizeNetworkError(error, { url, method, durationMs });
+    } finally {
+        clearTimeout(timeoutId);
     }
 }
 
-async function handleCreate(entity, jsonText, output) {
-    const payload = parseJsonPayload(jsonText, output);
-    if (!payload.ok) {
-        return;
-    }
-
-    try {
-        setOutput(output, `Creating ${entity}...`);
-        const response = await fetch(`${getApiBaseUrl()}/api/${entity}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload.value)
-        });
-        await writeResponse(output, response);
-    } catch (error) {
-        setOutput(output, `Request failed: ${error}`);
-    }
-}
-
-async function handleUpdate(entity, idText, jsonText, output) {
-    if (!idText) {
-        setOutput(output, "Provide an id for update.");
-        return;
-    }
-
-    const payload = parseJsonPayload(jsonText, output);
-    if (!payload.ok) {
-        return;
-    }
-
-    try {
-        setOutput(output, `Updating ${entity} id=${idText}...`);
-        const response = await fetch(`${getApiBaseUrl()}/api/${entity}/${encodeURIComponent(idText)}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload.value)
-        });
-        await writeResponse(output, response);
-    } catch (error) {
-        setOutput(output, `Request failed: ${error}`);
-    }
-}
-
-async function handleDelete(entity, idText, output) {
-    if (!idText) {
-        setOutput(output, "Provide an id for delete.");
-        return;
-    }
-
-    try {
-        setOutput(output, `Deleting ${entity} id=${idText}...`);
-        const response = await fetch(`${getApiBaseUrl()}/api/${entity}/${encodeURIComponent(idText)}`, {
-            method: "DELETE"
-        });
-        await writeResponse(output, response);
-    } catch (error) {
-        setOutput(output, `Request failed: ${error}`);
-    }
-}
-
-async function writeResponse(output, response) {
-    const text = await response.text();
-    const parsed = tryParseJson(text);
-    const body = parsed.ok ? JSON.stringify(parsed.value, null, 2) : text;
-
-    const payload = {
-        status: response.status,
-        ok: response.ok,
-        body
+function buildClientError(message) {
+    return {
+        ok: false,
+        status: 0,
+        url: "",
+        method: "",
+        durationMs: 0,
+        body: { message }
     };
+}
 
-    setOutput(output, JSON.stringify(payload, null, 2));
+function normalizeNetworkError(error, context) {
+    if (error && error.name === "AbortError") {
+        return {
+            ok: false,
+            status: 0,
+            ...context,
+            body: {
+                message: "Request timed out after 12 seconds.",
+                hint: "Check that the API is running and the base URL is correct."
+            }
+        };
+    }
+
+    const message = error && error.message ? error.message : String(error);
+    return {
+        ok: false,
+        status: 0,
+        ...context,
+        body: {
+            message: "Network error while contacting the API.",
+            details: message,
+            hint: "Check the API Base URL and ensure the server is running."
+        }
+    };
 }
 
 function tryParseJson(text) {
@@ -177,25 +160,111 @@ function tryParseJson(text) {
     }
 }
 
-function setOutput(output, value) {
-    output.textContent = value;
+function renderMessage(output, message) {
+    output.innerHTML = "";
+    const wrapper = document.createElement("div");
+    wrapper.className = "output-message";
+    wrapper.textContent = message;
+    output.appendChild(wrapper);
 }
 
-function getCaseInsensitivePropertyValue(obj, key) {
-    const match = Object.keys(obj).find((k) => k.toLowerCase() === key.toLowerCase());
-    return match ? obj[match] : undefined;
+function renderError(output, response) {
+    output.innerHTML = "";
+    const card = document.createElement("div");
+    card.className = "output-error";
+
+    const title = document.createElement("p");
+    title.className = "output-error-title";
+    title.textContent = "We could not load the data.";
+
+    const details = document.createElement("p");
+    details.className = "output-error-details";
+    details.textContent = response.body && response.body.message
+        ? response.body.message
+        : "The server returned an error.";
+
+    const hint = document.createElement("p");
+    hint.className = "output-error-hint";
+    hint.textContent = "Check the API Base URL and make sure the server is running.";
+
+    card.appendChild(title);
+    card.appendChild(details);
+    card.appendChild(hint);
+    output.appendChild(card);
 }
 
-function parseJsonPayload(jsonText, output) {
-    if (!jsonText) {
-        setOutput(output, "JSON payload is required.");
-        return { ok: false };
+function renderTable(output, rows, response) {
+    output.innerHTML = "";
+
+    const header = document.createElement("div");
+    header.className = "output-header";
+    header.textContent = `Loaded ${rows.length} rows in ${response.durationMs} ms.`;
+    output.appendChild(header);
+
+    if (rows.length === 0) {
+        renderMessage(output, "No records found.");
+        return;
     }
 
-    try {
-        return { ok: true, value: JSON.parse(jsonText) };
-    } catch (error) {
-        setOutput(output, `Invalid JSON payload: ${error}`);
-        return { ok: false };
+    const columns = buildColumnList(rows);
+    const table = document.createElement("table");
+    table.className = "data-table";
+
+    const thead = document.createElement("thead");
+    const headRow = document.createElement("tr");
+    for (const column of columns) {
+        const th = document.createElement("th");
+        th.textContent = prettifyColumnName(column);
+        headRow.appendChild(th);
     }
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+    for (const row of rows) {
+        const tr = document.createElement("tr");
+        for (const column of columns) {
+            const td = document.createElement("td");
+            const value = row[column];
+            td.textContent = formatCellValue(value);
+            tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+
+    output.appendChild(table);
+}
+
+function buildColumnList(rows) {
+    const keys = new Set();
+    for (const row of rows) {
+        if (row && typeof row === "object") {
+            Object.keys(row).forEach((key) => keys.add(key));
+        }
+    }
+    return Array.from(keys);
+}
+
+function prettifyColumnName(name) {
+    return name
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function formatCellValue(value) {
+    if (value === null || value === undefined) {
+        return "—";
+    }
+
+    if (typeof value === "string") {
+        return value;
+    }
+
+    if (typeof value === "number" || typeof value === "boolean") {
+        return String(value);
+    }
+
+    return JSON.stringify(value);
 }

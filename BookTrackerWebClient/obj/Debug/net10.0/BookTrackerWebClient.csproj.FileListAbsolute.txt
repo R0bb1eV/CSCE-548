@@ -28,6 +28,6 @@ C:\Users\super\OneDrive\Documents\CSCE-548\BookTrackerWebClient\obj\Debug\net10.
 C:\Users\super\OneDrive\Documents\CSCE-548\BookTrackerWebClient\obj\Debug\net10.0\BookTrackerWebClient.pdb
 C:\Users\super\OneDrive\Documents\CSCE-548\BookTrackerWebClient\obj\Debug\net10.0\BookTrackerWebClient.genruntimeconfig.cache
 C:\Users\super\OneDrive\Documents\CSCE-548\BookTrackerWebClient\obj\Debug\net10.0\ref\BookTrackerWebClient.dll
-C:\Users\super\OneDrive\Documents\CSCE-548\BookTrackerWebClient\obj\Debug\net10.0\compressed\9cdru0gs6u-{0}-bs8dky8qcq-bs8dky8qcq.gz
-C:\Users\super\OneDrive\Documents\CSCE-548\BookTrackerWebClient\obj\Debug\net10.0\compressed\38aq9bj0c8-{0}-4k54gsor6g-4k54gsor6g.gz
-C:\Users\super\OneDrive\Documents\CSCE-548\BookTrackerWebClient\obj\Debug\net10.0\compressed\cimg4p9u0d-{0}-wafpsex8oj-wafpsex8oj.gz
+C:\Users\super\OneDrive\Documents\CSCE-548\BookTrackerWebClient\obj\Debug\net10.0\compressed\9cdru0gs6u-{0}-cb5bou53t0-cb5bou53t0.gz
+C:\Users\super\OneDrive\Documents\CSCE-548\BookTrackerWebClient\obj\Debug\net10.0\compressed\cimg4p9u0d-{0}-3dgrbf9ogs-3dgrbf9ogs.gz
+C:\Users\super\OneDrive\Documents\CSCE-548\BookTrackerWebClient\obj\Debug\net10.0\compressed\38aq9bj0c8-{0}-qsplvx6nit-qsplvx6nit.gz

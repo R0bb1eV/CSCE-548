@@ -1,17 +1,19 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>BookTracker Web Client</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <main class="container">
         <header class="hero">
-            <p class="eyebrow">Service Test Console</p>
-            <h1>BookTracker API Web Client</h1>
-            <p class="intro">Test all methods for all tables: GET, POST, PUT, DELETE.</p>
+            <p class="eyebrow">BookTracker Web Client</p>
+            <h1>Browse Your Data, One Table at a Time</h1>
+            <p class="intro">Click a button to load a table.</p>
         </header>
 
         <section class="config">
@@ -22,195 +24,50 @@
         <section class="grid">
             <article class="panel" data-entity="authors">
                 <h2>Authors</h2>
+                <p class="panel-help">Load all authors from the database.</p>
                 <div class="actions">
-                    <h3>GET</h3>
-                    <button data-action="all">Get All</button>
-                    <div class="inline">
-                        <input data-role="id-input" type="number" min="1" placeholder="AuthorId" />
-                        <button data-action="single">Get By Id</button>
-                    </div>
-                    <div class="inline">
-                        <input data-role="filter-field" type="text" value="lastName" />
-                        <input data-role="filter-value" type="text" placeholder="e.g. Sm" />
-                        <button data-action="subset">Get Subset</button>
-                    </div>
-
-                    <h3>POST</h3>
-                    <textarea data-role="create-json" rows="6">{
-  "firstName": "Jane",
-  "middleName": "Q",
-  "lastName": "Austen",
-  "birthYear": 1775
-}</textarea>
-                    <button data-action="create">Create</button>
-
-                    <h3>PUT</h3>
-                    <div class="inline">
-                        <input data-role="update-id" type="number" min="1" placeholder="AuthorId" />
-                    </div>
-                    <textarea data-role="update-json" rows="6">{
-  "firstName": "UpdatedJane",
-  "middleName": "Q",
-  "lastName": "Austen",
-  "birthYear": 1775
-}</textarea>
-                    <button data-action="update">Update</button>
-
-                    <h3>DELETE</h3>
-                    <div class="inline">
-                        <input data-role="delete-id" type="number" min="1" placeholder="AuthorId" />
-                        <button data-action="delete">Delete</button>
-                    </div>
+                    <button data-action="all">Load Authors</button>
                 </div>
-                <pre data-role="output"></pre>
+                <div class="output" data-role="output">
+                    <p class="output-empty">No data yet. Click “Load Authors”.</p>
+                </div>
             </article>
 
             <article class="panel" data-entity="books">
                 <h2>Books</h2>
+                <p class="panel-help">Load the list of books and their details.</p>
                 <div class="actions">
-                    <h3>GET</h3>
-                    <button data-action="all">Get All</button>
-                    <div class="inline">
-                        <input data-role="id-input" type="number" min="1" placeholder="Book ID" />
-                        <button data-action="single">Get By Id</button>
-                    </div>
-                    <div class="inline">
-                        <input data-role="filter-field" type="text" value="genre" />
-                        <input data-role="filter-value" type="text" placeholder="e.g. Fiction" />
-                        <button data-action="subset">Get Subset</button>
-                    </div>
-
-                    <h3>POST</h3>
-                    <textarea data-role="create-json" rows="8">{
-  "title": "New Book",
-  "pageCount": 250,
-  "genre": "Fiction",
-  "publishingHouse": "Sample Press",
-  "yearOfRelease": 2024,
-  "isbn": "9781111111111",
-  "authorId": 1
-}</textarea>
-                    <button data-action="create">Create</button>
-
-                    <h3>PUT</h3>
-                    <div class="inline">
-                        <input data-role="update-id" type="number" min="1" placeholder="Book ID" />
-                    </div>
-                    <textarea data-role="update-json" rows="8">{
-  "title": "Updated Book",
-  "pageCount": 300,
-  "genre": "Fiction",
-  "publishingHouse": "Sample Press",
-  "yearOfRelease": 2024,
-  "isbn": "9781111111111",
-  "authorId": 1
-}</textarea>
-                    <button data-action="update">Update</button>
-
-                    <h3>DELETE</h3>
-                    <div class="inline">
-                        <input data-role="delete-id" type="number" min="1" placeholder="Book ID" />
-                        <button data-action="delete">Delete</button>
-                    </div>
+                    <button data-action="all">Load Books</button>
                 </div>
-                <pre data-role="output"></pre>
+                <div class="output" data-role="output">
+                    <p class="output-empty">No data yet. Click “Load Books”.</p>
+                </div>
             </article>
 
             <article class="panel" data-entity="users">
                 <h2>Users</h2>
+                <p class="panel-help">Load all registered users.</p>
                 <div class="actions">
-                    <h3>GET</h3>
-                    <button data-action="all">Get All</button>
-                    <div class="inline">
-                        <input data-role="id-input" type="number" min="1" placeholder="UserId" />
-                        <button data-action="single">Get By Id</button>
-                    </div>
-                    <div class="inline">
-                        <input data-role="filter-field" type="text" value="username" />
-                        <input data-role="filter-value" type="text" placeholder="e.g. svc" />
-                        <button data-action="subset">Get Subset</button>
-                    </div>
-
-                    <h3>POST</h3>
-                    <textarea data-role="create-json" rows="7">{
-  "username": "new_user",
-  "email": "new_user@example.com",
-  "dob": "1999-09-09T00:00:00Z",
-  "accountCreationDate": "2026-03-02T00:00:00Z"
-}</textarea>
-                    <button data-action="create">Create</button>
-
-                    <h3>PUT</h3>
-                    <div class="inline">
-                        <input data-role="update-id" type="number" min="1" placeholder="UserId" />
-                    </div>
-                    <textarea data-role="update-json" rows="7">{
-  "username": "updated_user",
-  "email": "updated_user@example.com",
-  "dob": "1999-09-09T00:00:00Z",
-  "accountCreationDate": "2026-03-02T00:00:00Z"
-}</textarea>
-                    <button data-action="update">Update</button>
-
-                    <h3>DELETE</h3>
-                    <div class="inline">
-                        <input data-role="delete-id" type="number" min="1" placeholder="UserId" />
-                        <button data-action="delete">Delete</button>
-                    </div>
+                    <button data-action="all">Load Users</button>
                 </div>
-                <pre data-role="output"></pre>
+                <div class="output" data-role="output">
+                    <p class="output-empty">No data yet. Click “Load Users”.</p>
+                </div>
             </article>
 
             <article class="panel" data-entity="activities">
                 <h2>Activities</h2>
+                <p class="panel-help">Load reading activities for all users.</p>
                 <div class="actions">
-                    <h3>GET</h3>
-                    <button data-action="all">Get All</button>
-                    <div class="inline">
-                        <input data-role="id-input" type="number" min="1" placeholder="ActivityId" />
-                        <button data-action="single">Get By Id</button>
-                    </div>
-                    <div class="inline">
-                        <input data-role="filter-field" type="text" value="bookStatus" />
-                        <input data-role="filter-value" type="text" placeholder="e.g. reading" />
-                        <button data-action="subset">Get Subset</button>
-                    </div>
-
-                    <h3>POST</h3>
-                    <textarea data-role="create-json" rows="8">{
-  "userId": 1,
-  "bookId": 1,
-  "bookStatus": "reading",
-  "progressCompleted": 40,
-  "startDate": "2026-03-02T00:00:00Z",
-  "endDate": null
-}</textarea>
-                    <button data-action="create">Create</button>
-
-                    <h3>PUT</h3>
-                    <div class="inline">
-                        <input data-role="update-id" type="number" min="1" placeholder="ActivityId" />
-                    </div>
-                    <textarea data-role="update-json" rows="8">{
-  "userId": 1,
-  "bookId": 1,
-  "bookStatus": "completed",
-  "progressCompleted": 100,
-  "startDate": "2026-03-02T00:00:00Z",
-  "endDate": "2026-03-10T00:00:00Z"
-}</textarea>
-                    <button data-action="update">Update</button>
-
-                    <h3>DELETE</h3>
-                    <div class="inline">
-                        <input data-role="delete-id" type="number" min="1" placeholder="ActivityId" />
-                        <button data-action="delete">Delete</button>
-                    </div>
+                    <button data-action="all">Load Activities</button>
                 </div>
-                <pre data-role="output"></pre>
+                <div class="output" data-role="output">
+                    <p class="output-empty">No data yet. Click “Load Activities”.</p>
+                </div>
             </article>
         </section>
     </main>
     <script src="app.js"></script>
 </body>
+
 </html>
