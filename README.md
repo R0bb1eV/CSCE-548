@@ -6,7 +6,7 @@ BookTracker is a small end-to-end app with:
 - `BookTracker` (shared business/models/data logic)
 - `BookTrackerConsoleClient` (optional console client)
 
-## AI Usage Summary (short)
+## AI Usage Summary
 - Prompts by layer: front end UI changes, API CORS fixes, data-layer JSON fix, docs updates.
 - Changes to AI output: tightened CORS, enum alignment, removed OpenAPI package.
 - Effectiveness: fast UI + docs; missed enum/port conflicts and required manual fixes.
@@ -48,4 +48,3 @@ See `DEPLOYMENT.md`.
 - GET Single Items: `img/image4.png`
 - Create: `img/image2.png`
 - Update: `img/image3.png`
-- Delete: (add screenshot if available)
