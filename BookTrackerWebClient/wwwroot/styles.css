@@ -124,6 +124,10 @@ h1 {
     gap: 0.6rem;
 }
 
+.crud .inline {
+    gap: 0.7rem;
+}
+
 .divider {
     height: 1px;
     background: var(--border);
@@ -141,33 +145,37 @@ h1 {
 input {
     min-width: 0;
     flex: 1;
-    padding: 0.52rem 0.58rem;
+    padding: 0.65rem 0.7rem;
     border: 1px solid var(--border);
     border-radius: 0.5rem;
     background: var(--surface-soft);
+    min-height: 42px;
+    font-size: 0.95rem;
 }
 
 textarea {
     min-width: 0;
     flex: 1;
     min-height: 64px;
-    padding: 0.55rem 0.6rem;
+    padding: 0.7rem 0.75rem;
     border: 1px solid var(--border);
     border-radius: 0.5rem;
     background: var(--surface-soft);
     resize: vertical;
     font-family: "Consolas", "Courier New", monospace;
-    font-size: 0.82rem;
+    font-size: 0.9rem;
 }
 
 select {
     min-width: 0;
     flex: 1;
-    padding: 0.52rem 0.58rem;
+    padding: 0.65rem 0.7rem;
     border: 1px solid var(--border);
     border-radius: 0.5rem;
     background: var(--surface-soft);
     color: var(--text);
+    min-height: 42px;
+    font-size: 0.95rem;
 }
 
 input:focus {

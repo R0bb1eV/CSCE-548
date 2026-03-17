@@ -172,9 +172,7 @@ async function handleGetSubset(entity, field, value, output) {
 }
 
 async function handleCreate(entity, panel, output) {
-    const parsed = entity === "books"
-        ? collectBookPayload(panel, false, output)
-        : parseJsonInput(panel.querySelector('[data-role="create-json"]').value.trim(), output);
+    const parsed = collectPayload(entity, panel, false, output);
 
     if (!parsed.ok) {
         return;
@@ -208,9 +206,7 @@ async function handleUpdate(entity, panel, output) {
         return;
     }
 
-    const parsed = entity === "books"
-        ? collectBookPayload(panel, true, output)
-        : parseJsonInput(panel.querySelector('[data-role="update-json"]').value.trim(), output);
+    const parsed = collectPayload(entity, panel, true, output);
 
     if (!parsed.ok) {
         return;
@@ -291,23 +287,29 @@ async function apiRequest({ method, path, body }) {
     }
 }
 
-function parseJsonInput(jsonText, output) {
-    if (!jsonText) {
-        renderMessage(output, "Please enter a JSON body first.");
-        return { ok: false };
-    }
-
-    try {
-        const value = JSON.parse(jsonText);
-        if (!value || typeof value !== "object" || Array.isArray(value)) {
-            renderMessage(output, "JSON body must be an object (no arrays).");
+function collectPayload(entity, panel, isUpdate, output) {
+    switch (entity) {
+        case "authors":
+            return collectAuthorPayload(panel, isUpdate, output);
+        case "books":
+            return collectBookPayload(panel, isUpdate, output);
+        case "users":
+            return collectUserPayload(panel, isUpdate, output);
+        case "activities":
+            return collectActivityPayload(panel, isUpdate, output);
+        default:
+            renderMessage(output, "Unsupported entity for create/update.");
             return { ok: false };
-        }
-        return { ok: true, value };
-    } catch {
-        renderMessage(output, "Invalid JSON. Make sure it is valid JSON before submitting.");
-        return { ok: false };
     }
+}
+
+function validateRequired(output, requiredItems) {
+    const missing = requiredItems.filter((item) => item.value === null || item.value === "").map((item) => item.key);
+    if (missing.length > 0) {
+        renderMessage(output, `Please fill in: ${missing.join(", ")}.`);
+        return false;
+    }
+    return true;
 }
 
 function collectBookPayload(panel, isUpdate, output) {
@@ -340,9 +342,7 @@ function collectBookPayload(panel, isUpdate, output) {
         { key: "Author ID", value: authorId }
     ];
 
-    const missing = required.filter((item) => item.value === null || item.value === "").map((item) => item.key);
-    if (missing.length > 0) {
-        renderMessage(output, `Please fill in: ${missing.join(", ")}.`);
+    if (!validateRequired(output, required)) {
         return { ok: false };
     }
 
@@ -356,6 +356,118 @@ function collectBookPayload(panel, isUpdate, output) {
             yearOfRelease,
             isbn,
             authorId
+        }
+    };
+}
+
+function collectAuthorPayload(panel, isUpdate, output) {
+    const suffix = isUpdate ? "-update" : "";
+    const getValue = (role) => panel.querySelector(`[data-role="${role}${suffix}"]`)?.value.trim() ?? "";
+    const getNumber = (role) => {
+        const raw = getValue(role);
+        if (!raw) {
+            return null;
+        }
+        const value = Number(raw);
+        return Number.isFinite(value) ? value : null;
+    };
+
+    const firstName = getValue("author-first-name");
+    const middleName = getValue("author-middle-name");
+    const lastName = getValue("author-last-name");
+    const birthYear = getNumber("author-birth-year");
+
+    const required = [
+        { key: "First Name", value: firstName },
+        { key: "Last Name", value: lastName },
+        { key: "Birth Year", value: birthYear }
+    ];
+
+    if (!validateRequired(output, required)) {
+        return { ok: false };
+    }
+
+    return {
+        ok: true,
+        value: {
+            firstName,
+            middleName: middleName || null,
+            lastName,
+            birthYear
+        }
+    };
+}
+
+function collectUserPayload(panel, isUpdate, output) {
+    const suffix = isUpdate ? "-update" : "";
+    const getValue = (role) => panel.querySelector(`[data-role="${role}${suffix}"]`)?.value.trim() ?? "";
+
+    const username = getValue("user-username");
+    const email = getValue("user-email");
+    const dob = getValue("user-dob");
+    const accountCreationDate = getValue("user-account-date");
+
+    const required = [
+        { key: "Username", value: username },
+        { key: "Email", value: email },
+        { key: "Date of Birth", value: dob },
+        { key: "Account Creation Date", value: accountCreationDate }
+    ];
+
+    if (!validateRequired(output, required)) {
+        return { ok: false };
+    }
+
+    return {
+        ok: true,
+        value: {
+            username,
+            email,
+            dob,
+            accountCreationDate
+        }
+    };
+}
+
+function collectActivityPayload(panel, isUpdate, output) {
+    const suffix = isUpdate ? "-update" : "";
+    const getValue = (role) => panel.querySelector(`[data-role="${role}${suffix}"]`)?.value.trim() ?? "";
+    const getNumber = (role) => {
+        const raw = getValue(role);
+        if (raw === "") {
+            return null;
+        }
+        const value = Number(raw);
+        return Number.isFinite(value) ? value : null;
+    };
+
+    const userId = getNumber("activity-user-id");
+    const bookId = getNumber("activity-book-id");
+    const bookStatus = getValue("activity-status");
+    const progressCompleted = getNumber("activity-progress");
+    const startDate = getValue("activity-start-date");
+    const endDate = getValue("activity-end-date");
+
+    const required = [
+        { key: "User ID", value: userId },
+        { key: "Book ID", value: bookId },
+        { key: "Status", value: bookStatus },
+        { key: "Progress %", value: progressCompleted }
+    ];
+
+    if (!validateRequired(output, required)) {
+        return { ok: false };
+    }
+
+    return {
+        ok: true,
+        value: {
+            userId,
+            bookId,
+            bookStatus,
+            progressCompleted,
+            startDate: startDate || null,
+            endDate: endDate || null
         }
     };
 }
