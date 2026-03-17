@@ -15,14 +15,14 @@ BookTracker is a small end-to-end app with:
    - `dotnet run --project .\BookTrackerApi\BookTrackerApi.csproj`
 4. Run the web client:
    - `dotnet run --project .\BookTrackerWebClient\BookTrackerWebClient.csproj`
-5. Open the web client URL and click “Load All Authors”.
+5. Open the web client URL and click "Load All Authors".
 
 ## Hosting Overview
 - API hosting: Render
   - Env vars: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `ASPNETCORE_ENVIRONMENT=Production`
 - Web client hosting: Vercel
   - Root directory: `BookTrackerWebClient`
-  - Env var: `WEBCLIENT_API_BASE_URL=https://<your-render-service>.onrender.com`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - Env var: `WEBCLIENT_API_BASE_URL=https://<your-render-service>.onrender.com`
 
 ## Success Checks
 - API: `GET /` returns `BookTracker API is running.`
@@ -31,3 +31,16 @@ BookTracker is a small end-to-end app with:
 
 ## Full Deployment Instructions
 See `DEPLOYMENT.md`.
+
+## AI Usage Summary (short)
+- Prompts by layer: front end UI changes, API CORS fixes, data-layer JSON fix, docs updates.
+- Changes to AI output: tightened CORS, enum alignment, removed OpenAPI package.
+- Effectiveness: fast UI + docs; missed enum/port conflicts and required manual fixes.
+
+
+## Screenshots
+- GET All Items: `img/image.png`
+- GET Single Items: `img/image4.png`
+- Create: `img/image2.png`
+- Update: `img/image3.png`
+- Delete: (add screenshot if available)

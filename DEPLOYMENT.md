@@ -1,6 +1,6 @@
 # BookTracker Deployment Guide
 
-This guide walks a new user from “Download ZIP” to a working deployment (local and hosted).
+This guide walks a new user from "Download ZIP" to a working deployment (local and hosted).
 
 ## Contents
 1. Project overview
@@ -12,13 +12,14 @@ This guide walks a new user from “Download ZIP” to a working deployment (loc
 7. Host the front end (Vercel)
 8. Validate success
 9. Troubleshooting
+10. AI Usage Summary
 
 ## 1. Project overview
 This repo contains four components:
-- `BookTracker` – Shared business/models/data logic.
-- `BookTrackerApi` – ASP.NET Core Web API (service layer).
-- `BookTrackerWebClient` – Static HTML/JS web client (frontend).
-- `BookTrackerConsoleClient` – Optional console client.
+- `BookTracker` - Shared business/models/data logic.
+- `BookTrackerApi` - ASP.NET Core Web API (service layer).
+- `BookTrackerWebClient` - Static HTML/JS web client (frontend).
+- `BookTrackerConsoleClient` - Optional console client.
 
 The API talks to Supabase (Postgres) using `SUPABASE_URL` and `SUPABASE_ANON_KEY`.
 The web client talks to the API using `WEBCLIENT_API_BASE_URL`.
@@ -50,8 +51,8 @@ You will need three values:
 ### 4.1 Supabase setup
 1. Create a Supabase project.
 2. In Supabase, find:
-   - Project URL → `SUPABASE_URL`
-   - Anon public key → `SUPABASE_ANON_KEY`
+   - Project URL -> `SUPABASE_URL`
+   - Anon public key -> `SUPABASE_ANON_KEY`
 3. Create the database schema and seed data:
    - Use the SQL files in `BookTracker`:
      - `BookTracker/table_creation_postgres.sql`
@@ -80,8 +81,8 @@ You will set env vars in the host dashboards:
 4. The API will start on `http://localhost:5080` by default.
 
 Verify:
-- Visit `http://localhost:5080/` → should return `BookTracker API is running.`
-- Visit `http://localhost:5080/api/ping` → should return JSON with `status: ok`.
+- Visit `http://localhost:5080/` -> should return `BookTracker API is running.`
+- Visit `http://localhost:5080/api/ping` -> should return JSON with `status: ok`.
 
 ### 5.2 Web client (local)
 The web client is static. You can serve it locally in any simple server.
@@ -98,7 +99,7 @@ Option B: Open directly
 2. Set the API Base URL in the UI.
 
 Verify:
-- Click “Load All Authors” and confirm data is shown.
+- Click "Load All Authors" and confirm data is shown.
 
 ## 6. Host the back end (Render)
 The API is already configured for Render with `render.yaml`.
@@ -132,10 +133,10 @@ The web client is static and deployed from `BookTrackerWebClient`.
 
 Verify:
 - Open your Vercel URL.
-- Click “Load All Books” and confirm data appears.
+- Click "Load All Books" and confirm data appears.
 
 ## 8. Validate success
-You’re done if:
+You're done if:
 - API root shows the running message.
 - `/api/ping` returns JSON with `status: ok`.
 - Web client loads data without errors.
@@ -148,6 +149,36 @@ You’re done if:
 - API errors:
   - Check Render environment variables and Supabase keys.
   - Confirm Supabase tables were created with the provided SQL.
-- Web client can’t reach API:
+- Web client can't reach API:
   - Make sure `WEBCLIENT_API_BASE_URL` is correct.
   - Confirm Render service is running.
+
+# Screenshots:
+
+## GET All Items
+![alt text](img/image.png)
+
+## GET Single Items
+![alt text](img/image4.png)
+## Create
+![alt text](img/image2.png)
+
+## Update
+![alt text](img/image3.png)
+## Delete
+
+## 10. AI Usage Summary (short)
+### Prompts used (by layer)
+- Front end: add insert/update, make fields user friendly, add delete, increase input sizes, add dividers.
+- API: add CORS headers, fix CORS errors, fix build errors.
+- Data layer: fix JsonDocument disposal, align enum values.
+- Docs: generate deployment doc, update README.
+
+### Changes to AI output
+- CORS tightened to avoid `*`, added origin rules + explicit headers.
+- Activity status updated to Postgres enum (`toread`).
+- Removed OpenAPI package to fix build errors.
+
+### Effectiveness (concise)
+- AI sped up UI and docs, but missed enum mismatch and port conflicts.
+- Required manual fixes for CORS, build locks, and local port usage.
