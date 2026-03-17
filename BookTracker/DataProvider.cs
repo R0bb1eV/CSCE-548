@@ -1,392 +1,403 @@
 using System;
 using System.Collections.Generic;
-using Npgsql;
+using System.Globalization;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 
 namespace BookTracker
 {
     public class DataProvider
     {
-        private string _connectionString;
+        private readonly HttpClient _httpClient;
+        private readonly string _restBaseUrl;
 
-        public DataProvider(string connectionString)
+        public DataProvider(string supabaseUrl, string anonKey)
         {
-            _connectionString = connectionString;
+            if (string.IsNullOrWhiteSpace(supabaseUrl))
+            {
+                throw new ArgumentException("Supabase URL is required.", nameof(supabaseUrl));
+            }
+
+            if (string.IsNullOrWhiteSpace(anonKey))
+            {
+                throw new ArgumentException("Supabase anon key is required.", nameof(anonKey));
+            }
+
+            _restBaseUrl = $"{supabaseUrl.TrimEnd('/')}/rest/v1";
+            _httpClient = new HttpClient();
+            _httpClient.DefaultRequestHeaders.Add("apikey", anonKey);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", anonKey);
         }
 
         // ==================== AUTHOR CRUD ====================
         public void CreateAuthor(Author author)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = @"INSERT INTO author (first_name, middle_name, last_name, birth_year)
-                             VALUES (@FirstName, @MiddleName, @LastName, @BirthYear)
-                             RETURNING author_id";
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@FirstName", author.FirstName);
-            cmd.Parameters.AddWithValue("@MiddleName", author.MiddleName);
-            cmd.Parameters.AddWithValue("@LastName", author.LastName);
-            cmd.Parameters.AddWithValue("@BirthYear", author.BirthYear);
-            author.AuthorId = Convert.ToInt32(cmd.ExecuteScalar());
+            var payload = new Dictionary<string, object?>
+            {
+                ["first_name"] = author.FirstName,
+                ["middle_name"] = author.MiddleName,
+                ["last_name"] = author.LastName,
+                ["birth_year"] = author.BirthYear
+            };
+
+            var json = Send(HttpMethod.Post, "author", null, payload, preferReturn: true);
+            var rows = ParseArray(json);
+            if (rows.Count > 0)
+            {
+                author.AuthorId = GetInt(rows[0], "author_id");
+            }
         }
 
         public List<Author> ReadAllAuthors()
         {
-            var list = new List<Author>();
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = "SELECT * FROM author";
-            using var cmd = new NpgsqlCommand(query, conn);
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
+            var json = Send(HttpMethod.Get, "author", "select=*");
+            var rows = ParseArray(json);
+            var list = new List<Author>(rows.Count);
+            foreach (var row in rows)
             {
-                list.Add(new Author
-                {
-                    AuthorId = GetInt32(reader, "author_id"),
-                    FirstName = GetString(reader, "first_name"),
-                    MiddleName = IsNull(reader, "middle_name") ? null : GetString(reader, "middle_name"),
-                    LastName = GetString(reader, "last_name"),
-                    BirthYear = GetInt32(reader, "birth_year")
-                });
+                list.Add(MapAuthor(row));
             }
             return list;
         }
 
         public Author ReadAuthorById(int id)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = "SELECT * FROM author WHERE author_id = @Id";
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@Id", id);
-            using var reader = cmd.ExecuteReader();
-            if (reader.Read())
-            {
-                return new Author
-                {
-                    AuthorId = GetInt32(reader, "author_id"),
-                    FirstName = GetString(reader, "first_name"),
-                    MiddleName = IsNull(reader, "middle_name") ? null : GetString(reader, "middle_name"),
-                    LastName = GetString(reader, "last_name"),
-                    BirthYear = GetInt32(reader, "birth_year")
-                };
-            }
-            return null;
+            var json = Send(HttpMethod.Get, "author", $"author_id=eq.{id}&select=*");
+            var rows = ParseArray(json);
+            return rows.Count > 0 ? MapAuthor(rows[0]) : null;
         }
 
         public void UpdateAuthor(Author author)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = @"UPDATE author SET first_name=@FirstName, middle_name=@MiddleName, last_name=@LastName, birth_year=@BirthYear WHERE author_id=@Id";
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@FirstName", author.FirstName);
-            cmd.Parameters.AddWithValue("@MiddleName", author.MiddleName);
-            cmd.Parameters.AddWithValue("@LastName", author.LastName);
-            cmd.Parameters.AddWithValue("@BirthYear", author.BirthYear);
-            cmd.Parameters.AddWithValue("@Id", author.AuthorId);
-            cmd.ExecuteNonQuery();
+            var payload = new Dictionary<string, object?>
+            {
+                ["first_name"] = author.FirstName,
+                ["middle_name"] = author.MiddleName,
+                ["last_name"] = author.LastName,
+                ["birth_year"] = author.BirthYear
+            };
+
+            Send(HttpMethod.Patch, "author", $"author_id=eq.{author.AuthorId}", payload);
         }
 
         public void DeleteAuthor(int id)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = "DELETE FROM author WHERE author_id=@Id";
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@Id", id);
-            cmd.ExecuteNonQuery();
+            Send(HttpMethod.Delete, "author", $"author_id=eq.{id}");
         }
 
         // ==================== BOOK CRUD ====================
         public void CreateBook(Book book)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = @"INSERT INTO book (title, page_count, genre, publishing_house, year_of_release, isbn, author_id)
-                             VALUES (@Title, @PageCount, @Genre, @PublishingHouse, @YearOfRelease, @ISBN, @AuthorId)
-                             RETURNING id";
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@Title", book.Title);
-            cmd.Parameters.AddWithValue("@PageCount", book.PageCount);
-            cmd.Parameters.AddWithValue("@Genre", book.Genre);
-            cmd.Parameters.AddWithValue("@PublishingHouse", book.PublishingHouse);
-            cmd.Parameters.AddWithValue("@YearOfRelease", book.YearOfRelease);
-            cmd.Parameters.AddWithValue("@ISBN", book.ISBN);
-            cmd.Parameters.AddWithValue("@AuthorId", book.AuthorId);
-            book.ID = Convert.ToInt32(cmd.ExecuteScalar());
+            var payload = new Dictionary<string, object?>
+            {
+                ["title"] = book.Title,
+                ["page_count"] = book.PageCount,
+                ["genre"] = book.Genre,
+                ["publishing_house"] = book.PublishingHouse,
+                ["year_of_release"] = book.YearOfRelease,
+                ["isbn"] = book.ISBN,
+                ["author_id"] = book.AuthorId
+            };
+
+            var json = Send(HttpMethod.Post, "book", null, payload, preferReturn: true);
+            var rows = ParseArray(json);
+            if (rows.Count > 0)
+            {
+                book.ID = GetInt(rows[0], "id");
+            }
         }
 
         public List<Book> ReadAllBooks()
         {
-            var books = new List<Book>();
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = "SELECT * FROM book";
-            using var cmd = new NpgsqlCommand(query, conn);
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
+            var json = Send(HttpMethod.Get, "book", "select=*");
+            var rows = ParseArray(json);
+            var list = new List<Book>(rows.Count);
+            foreach (var row in rows)
             {
-                books.Add(new Book
-                {
-                    ID = GetInt32(reader, "id"),
-                    Title = GetString(reader, "title"),
-                    PageCount = GetInt32(reader, "page_count"),
-                    Genre = GetString(reader, "genre"),
-                    PublishingHouse = GetString(reader, "publishing_house"),
-                    YearOfRelease = GetInt32(reader, "year_of_release"),
-                    ISBN = GetString(reader, "isbn"),
-                    AuthorId = GetInt32(reader, "author_id")
-                });
+                list.Add(MapBook(row));
             }
-            return books;
+            return list;
         }
 
         public Book ReadBookById(int id)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = "SELECT * FROM book WHERE id=@Id";
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@Id", id);
-            using var reader = cmd.ExecuteReader();
-            if (reader.Read())
-            {
-                return new Book
-                {
-                    ID = GetInt32(reader, "id"),
-                    Title = GetString(reader, "title"),
-                    PageCount = GetInt32(reader, "page_count"),
-                    Genre = GetString(reader, "genre"),
-                    PublishingHouse = GetString(reader, "publishing_house"),
-                    YearOfRelease = GetInt32(reader, "year_of_release"),
-                    ISBN = GetString(reader, "isbn"),
-                    AuthorId = GetInt32(reader, "author_id")
-                };
-            }
-            return null;
+            var json = Send(HttpMethod.Get, "book", $"id=eq.{id}&select=*");
+            var rows = ParseArray(json);
+            return rows.Count > 0 ? MapBook(rows[0]) : null;
         }
 
         public void UpdateBook(Book book)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = @"UPDATE book SET title=@Title, page_count=@PageCount, genre=@Genre, publishing_house=@PublishingHouse, year_of_release=@YearOfRelease, isbn=@ISBN, author_id=@AuthorId WHERE id=@Id";
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@Title", book.Title);
-            cmd.Parameters.AddWithValue("@PageCount", book.PageCount);
-            cmd.Parameters.AddWithValue("@Genre", book.Genre);
-            cmd.Parameters.AddWithValue("@PublishingHouse", book.PublishingHouse);
-            cmd.Parameters.AddWithValue("@YearOfRelease", book.YearOfRelease);
-            cmd.Parameters.AddWithValue("@ISBN", book.ISBN);
-            cmd.Parameters.AddWithValue("@AuthorId", book.AuthorId);
-            cmd.Parameters.AddWithValue("@Id", book.ID);
-            cmd.ExecuteNonQuery();
+            var payload = new Dictionary<string, object?>
+            {
+                ["title"] = book.Title,
+                ["page_count"] = book.PageCount,
+                ["genre"] = book.Genre,
+                ["publishing_house"] = book.PublishingHouse,
+                ["year_of_release"] = book.YearOfRelease,
+                ["isbn"] = book.ISBN,
+                ["author_id"] = book.AuthorId
+            };
+
+            Send(HttpMethod.Patch, "book", $"id=eq.{book.ID}", payload);
         }
 
         public void DeleteBook(int id)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = "DELETE FROM book WHERE id=@Id";
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@Id", id);
-            cmd.ExecuteNonQuery();
+            Send(HttpMethod.Delete, "book", $"id=eq.{id}");
         }
 
         // ==================== USER CRUD ====================
         public void CreateUser(User user)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = @"INSERT INTO ""user"" (username, email, dob, account_creation_date)
-                             VALUES (@Username, @Email, @DOB, @AccountCreationDate)
-                             RETURNING user_id";
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@Username", user.Username);
-            cmd.Parameters.AddWithValue("@Email", user.Email);
-            cmd.Parameters.AddWithValue("@DOB", user.DOB);
-            cmd.Parameters.AddWithValue("@AccountCreationDate", user.AccountCreationDate == default ? DateTime.Now : user.AccountCreationDate);
-            user.UserId = Convert.ToInt32(cmd.ExecuteScalar());
+            var payload = new Dictionary<string, object?>
+            {
+                ["username"] = user.Username,
+                ["email"] = user.Email,
+                ["dob"] = user.DOB,
+                ["account_creation_date"] = user.AccountCreationDate == default ? DateTime.UtcNow : user.AccountCreationDate
+            };
+
+            var json = Send(HttpMethod.Post, "user", null, payload, preferReturn: true);
+            var rows = ParseArray(json);
+            if (rows.Count > 0)
+            {
+                user.UserId = GetInt(rows[0], "user_id");
+            }
         }
 
         public List<User> ReadAllUsers()
         {
-            var list = new List<User>();
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = @"SELECT * FROM ""user""";
-            using var cmd = new NpgsqlCommand(query, conn);
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
+            var json = Send(HttpMethod.Get, "user", "select=*");
+            var rows = ParseArray(json);
+            var list = new List<User>(rows.Count);
+            foreach (var row in rows)
             {
-                list.Add(new User
-                {
-                    UserId = GetInt32(reader, "user_id"),
-                    Username = GetString(reader, "username"),
-                    Email = GetString(reader, "email"),
-                    DOB = GetDateTime(reader, "dob"),
-                    AccountCreationDate = GetDateTime(reader, "account_creation_date")
-                });
+                list.Add(MapUser(row));
             }
             return list;
         }
 
         public User ReadUserById(int id)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = @"SELECT * FROM ""user"" WHERE user_id=@Id";
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@Id", id);
-            using var reader = cmd.ExecuteReader();
-            if (reader.Read())
-            {
-                return new User
-                {
-                    UserId = GetInt32(reader, "user_id"),
-                    Username = GetString(reader, "username"),
-                    Email = GetString(reader, "email"),
-                    DOB = GetDateTime(reader, "dob"),
-                    AccountCreationDate = GetDateTime(reader, "account_creation_date")
-                };
-            }
-            return null;
+            var json = Send(HttpMethod.Get, "user", $"user_id=eq.{id}&select=*");
+            var rows = ParseArray(json);
+            return rows.Count > 0 ? MapUser(rows[0]) : null;
         }
 
         public void UpdateUser(User user)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = @"UPDATE ""user"" SET username=@Username, email=@Email, dob=@DOB, account_creation_date=@AccountCreationDate WHERE user_id=@Id";
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@Username", user.Username);
-            cmd.Parameters.AddWithValue("@Email", user.Email);
-            cmd.Parameters.AddWithValue("@DOB", user.DOB);
-            cmd.Parameters.AddWithValue("@AccountCreationDate", user.AccountCreationDate);
-            cmd.Parameters.AddWithValue("@Id", user.UserId);
-            cmd.ExecuteNonQuery();
+            var payload = new Dictionary<string, object?>
+            {
+                ["username"] = user.Username,
+                ["email"] = user.Email,
+                ["dob"] = user.DOB,
+                ["account_creation_date"] = user.AccountCreationDate
+            };
+
+            Send(HttpMethod.Patch, "user", $"user_id=eq.{user.UserId}", payload);
         }
 
         public void DeleteUser(int id)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = @"DELETE FROM ""user"" WHERE user_id=@Id";
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@Id", id);
-            cmd.ExecuteNonQuery();
+            Send(HttpMethod.Delete, "user", $"user_id=eq.{id}");
         }
 
         // ==================== ACTIVITY CRUD ====================
         public void CreateActivity(Activity activity)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = @"INSERT INTO activity (user_id, book_id, book_status, progress_completed, start_date, end_date)
-                             VALUES (@UserId, @BookId, @BookStatus, @ProgressCompleted, @StartDate, @EndDate)
-                             RETURNING activity_id";
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@UserId", activity.UserId);
-            cmd.Parameters.AddWithValue("@BookId", activity.BookId);
-            cmd.Parameters.AddWithValue("@BookStatus", activity.BookStatus);
-            cmd.Parameters.AddWithValue("@ProgressCompleted", activity.ProgressCompleted);
-            cmd.Parameters.AddWithValue("@StartDate", (object)activity.StartDate ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@EndDate", (object)activity.EndDate ?? DBNull.Value);
-            activity.ActivityId = Convert.ToInt32(cmd.ExecuteScalar());
+            var payload = new Dictionary<string, object?>
+            {
+                ["user_id"] = activity.UserId,
+                ["book_id"] = activity.BookId,
+                ["book_status"] = activity.BookStatus,
+                ["progress_completed"] = activity.ProgressCompleted,
+                ["start_date"] = activity.StartDate,
+                ["end_date"] = activity.EndDate
+            };
+
+            var json = Send(HttpMethod.Post, "activity", null, payload, preferReturn: true);
+            var rows = ParseArray(json);
+            if (rows.Count > 0)
+            {
+                activity.ActivityId = GetInt(rows[0], "activity_id");
+            }
         }
 
         public List<Activity> ReadAllActivities()
         {
-            var list = new List<Activity>();
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = "SELECT * FROM activity";
-            using var cmd = new NpgsqlCommand(query, conn);
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
+            var json = Send(HttpMethod.Get, "activity", "select=*");
+            var rows = ParseArray(json);
+            var list = new List<Activity>(rows.Count);
+            foreach (var row in rows)
             {
-                list.Add(new Activity
-                {
-                    ActivityId = GetInt32(reader, "activity_id"),
-                    UserId = GetInt32(reader, "user_id"),
-                    BookId = GetInt32(reader, "book_id"),
-                    BookStatus = GetString(reader, "book_status"),
-                    ProgressCompleted = GetInt32(reader, "progress_completed"),
-                    StartDate = IsNull(reader, "start_date") ? null : GetDateTime(reader, "start_date"),
-                    EndDate = IsNull(reader, "end_date") ? null : GetDateTime(reader, "end_date")
-                });
+                list.Add(MapActivity(row));
             }
             return list;
         }
 
         public Activity ReadActivityById(int id)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = "SELECT * FROM activity WHERE activity_id=@Id";
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@Id", id);
-            using var reader = cmd.ExecuteReader();
-            if (reader.Read())
-            {
-                return new Activity
-                {
-                    ActivityId = GetInt32(reader, "activity_id"),
-                    UserId = GetInt32(reader, "user_id"),
-                    BookId = GetInt32(reader, "book_id"),
-                    BookStatus = GetString(reader, "book_status"),
-                    ProgressCompleted = GetInt32(reader, "progress_completed"),
-                    StartDate = IsNull(reader, "start_date") ? null : GetDateTime(reader, "start_date"),
-                    EndDate = IsNull(reader, "end_date") ? null : GetDateTime(reader, "end_date")
-                };
-            }
-            return null;
+            var json = Send(HttpMethod.Get, "activity", $"activity_id=eq.{id}&select=*");
+            var rows = ParseArray(json);
+            return rows.Count > 0 ? MapActivity(rows[0]) : null;
         }
 
         public void UpdateActivity(Activity activity)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = @"UPDATE activity SET user_id=@UserId, book_id=@BookId, book_status=@BookStatus, progress_completed=@ProgressCompleted, start_date=@StartDate, end_date=@EndDate WHERE activity_id=@Id";
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@UserId", activity.UserId);
-            cmd.Parameters.AddWithValue("@BookId", activity.BookId);
-            cmd.Parameters.AddWithValue("@BookStatus", activity.BookStatus);
-            cmd.Parameters.AddWithValue("@ProgressCompleted", activity.ProgressCompleted);
-            cmd.Parameters.AddWithValue("@StartDate", (object)activity.StartDate ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@EndDate", (object)activity.EndDate ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@Id", activity.ActivityId);
-            cmd.ExecuteNonQuery();
+            var payload = new Dictionary<string, object?>
+            {
+                ["user_id"] = activity.UserId,
+                ["book_id"] = activity.BookId,
+                ["book_status"] = activity.BookStatus,
+                ["progress_completed"] = activity.ProgressCompleted,
+                ["start_date"] = activity.StartDate,
+                ["end_date"] = activity.EndDate
+            };
+
+            Send(HttpMethod.Patch, "activity", $"activity_id=eq.{activity.ActivityId}", payload);
         }
 
         public void DeleteActivity(int id)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            string query = "DELETE FROM activity WHERE activity_id=@Id";
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@Id", id);
-            cmd.ExecuteNonQuery();
+            Send(HttpMethod.Delete, "activity", $"activity_id=eq.{id}");
         }
 
-        private static int GetInt32(NpgsqlDataReader reader, string column)
+        // ==================== REST HELPERS ====================
+        private string Send(HttpMethod method, string table, string? query, object? body = null, bool preferReturn = false)
         {
-            return reader.GetInt32(reader.GetOrdinal(column));
+            var url = $"{_restBaseUrl}/{table}";
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                url += "?" + query;
+            }
+
+            using var request = new HttpRequestMessage(method, url);
+            if (preferReturn)
+            {
+                request.Headers.TryAddWithoutValidation("Prefer", "return=representation");
+            }
+
+            if (body != null)
+            {
+                var payload = JsonSerializer.Serialize(body);
+                request.Content = new StringContent(payload, Encoding.UTF8, "application/json");
+            }
+
+            using var response = _httpClient.Send(request);
+            var content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new InvalidOperationException($"Supabase request failed ({(int)response.StatusCode}): {content}");
+            }
+
+            return content;
         }
 
-        private static string GetString(NpgsqlDataReader reader, string column)
+        private static List<JsonElement> ParseArray(string json)
         {
-            return reader.GetString(reader.GetOrdinal(column));
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return new List<JsonElement>();
+            }
+
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.ValueKind != JsonValueKind.Array)
+            {
+                return new List<JsonElement>();
+            }
+
+            var list = new List<JsonElement>();
+            foreach (var item in doc.RootElement.EnumerateArray())
+            {
+                list.Add(item);
+            }
+            return list;
         }
 
-        private static DateTime GetDateTime(NpgsqlDataReader reader, string column)
+        private static Author MapAuthor(JsonElement row)
         {
-            return reader.GetDateTime(reader.GetOrdinal(column));
+            return new Author
+            {
+                AuthorId = GetInt(row, "author_id"),
+                FirstName = GetString(row, "first_name"),
+                MiddleName = GetStringNullable(row, "middle_name"),
+                LastName = GetString(row, "last_name"),
+                BirthYear = GetInt(row, "birth_year")
+            };
         }
 
-        private static bool IsNull(NpgsqlDataReader reader, string column)
+        private static Book MapBook(JsonElement row)
         {
-            return reader.IsDBNull(reader.GetOrdinal(column));
+            return new Book
+            {
+                ID = GetInt(row, "id"),
+                Title = GetString(row, "title"),
+                PageCount = GetInt(row, "page_count"),
+                Genre = GetString(row, "genre"),
+                PublishingHouse = GetString(row, "publishing_house"),
+                YearOfRelease = GetInt(row, "year_of_release"),
+                ISBN = GetString(row, "isbn"),
+                AuthorId = GetInt(row, "author_id")
+            };
+        }
+
+        private static User MapUser(JsonElement row)
+        {
+            return new User
+            {
+                UserId = GetInt(row, "user_id"),
+                Username = GetString(row, "username"),
+                Email = GetString(row, "email"),
+                DOB = GetDate(row, "dob") ?? DateTime.MinValue,
+                AccountCreationDate = GetDate(row, "account_creation_date") ?? DateTime.MinValue
+            };
+        }
+
+        private static Activity MapActivity(JsonElement row)
+        {
+            return new Activity
+            {
+                ActivityId = GetInt(row, "activity_id"),
+                UserId = GetInt(row, "user_id"),
+                BookId = GetInt(row, "book_id"),
+                BookStatus = GetString(row, "book_status"),
+                ProgressCompleted = GetInt(row, "progress_completed"),
+                StartDate = GetDate(row, "start_date"),
+                EndDate = GetDate(row, "end_date")
+            };
+        }
+
+        private static int GetInt(JsonElement row, string name)
+        {
+            return row.GetProperty(name).GetInt32();
+        }
+
+        private static string GetString(JsonElement row, string name)
+        {
+            return row.GetProperty(name).GetString() ?? string.Empty;
+        }
+
+        private static string? GetStringNullable(JsonElement row, string name)
+        {
+            return row.TryGetProperty(name, out var value) && value.ValueKind != JsonValueKind.Null
+                ? value.GetString()
+                : null;
+        }
+
+        private static DateTime? GetDate(JsonElement row, string name)
+        {
+            if (!row.TryGetProperty(name, out var value) || value.ValueKind == JsonValueKind.Null)
+            {
+                return null;
+            }
+
+            var text = value.GetString();
+            return string.IsNullOrWhiteSpace(text)
+                ? null
+                : DateTime.Parse(text, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
         }
     }
 }

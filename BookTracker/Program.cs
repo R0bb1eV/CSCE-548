@@ -8,9 +8,12 @@ namespace BookTrackerTest
     {
         static void Main(string[] args)
         {
-            // MySQL connection string
-            string connectionString = "server=localhost;database=booktracker;user=root;password=password;SslMode=Preferred";
-            var dp = new DataProvider(connectionString);
+            var supabaseUrl = Environment.GetEnvironmentVariable("SUPABASE_URL")
+                ?? "https://abbnoikpayuehhqhttwm.supabase.co";
+            var supabaseAnonKey = Environment.GetEnvironmentVariable("SUPABASE_ANON_KEY")
+                ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFiYm5vaWtwYXl1ZWhocWh0dHdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MTQyNDQsImV4cCI6MjA4OTI5MDI0NH0.l9k6VMUuLPU2Cs_Wix-Ii_CNHCnTMcUC1aWqHvWZUGE";
+
+            var dp = new DataProvider(supabaseUrl, supabaseAnonKey);
 
             Console.WriteLine("===== TEST HARNESS START =====\n");
 

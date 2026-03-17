@@ -23,10 +23,15 @@ builder.Services.AddCors(options =>
     });
 });
 
-var connectionString = builder.Configuration.GetConnectionString("BookTrackerDb")
-    ?? throw new InvalidOperationException("Missing connection string: ConnectionStrings:BookTrackerDb");
+var supabaseUrl = builder.Configuration["Supabase:Url"] ?? builder.Configuration["SUPABASE_URL"];
+var supabaseAnonKey = builder.Configuration["Supabase:AnonKey"] ?? builder.Configuration["SUPABASE_ANON_KEY"];
 
-builder.Services.AddScoped(_ => new DataProvider(connectionString));
+if (string.IsNullOrWhiteSpace(supabaseUrl) || string.IsNullOrWhiteSpace(supabaseAnonKey))
+{
+    throw new InvalidOperationException("Missing Supabase settings: Supabase:Url and Supabase:AnonKey.");
+}
+
+builder.Services.AddScoped(_ => new DataProvider(supabaseUrl, supabaseAnonKey));
 builder.Services.AddScoped<IAuthorBusiness, AuthorBusiness>();
 builder.Services.AddScoped<IBookBusiness, BookBusiness>();
 builder.Services.AddScoped<IUserBusiness, UserBusiness>();
@@ -38,4 +43,6 @@ var app = builder.Build();
 
 app.UseCors("WebClientCors");
 app.MapControllers();
+app.MapGet("/", () => Results.Ok("BookTracker API is running."));
+app.MapGet("/api/ping", () => Results.Ok(new { status = "ok" }));
 app.Run();

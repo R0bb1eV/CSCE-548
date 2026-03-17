@@ -10,5 +10,7 @@ services:
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
-      - key: ConnectionStrings__BookTrackerDb
-        value: "__SUPABASE_CONNECTION_STRING__"
+      - key: SUPABASE_URL
+        value: "__SUPABASE_PROJECT_URL__"
+      - key: SUPABASE_ANON_KEY
+        value: "__SUPABASE_ANON_KEY__"
