@@ -26,12 +26,17 @@ builder.Services.AddCors(options =>
 var supabaseUrl = builder.Configuration["Supabase:Url"] ?? builder.Configuration["SUPABASE_URL"];
 var supabaseAnonKey = builder.Configuration["Supabase:AnonKey"] ?? builder.Configuration["SUPABASE_ANON_KEY"];
 
-if (string.IsNullOrWhiteSpace(supabaseUrl) || string.IsNullOrWhiteSpace(supabaseAnonKey))
+var hasSupabaseConfig = !string.IsNullOrWhiteSpace(supabaseUrl) && !string.IsNullOrWhiteSpace(supabaseAnonKey);
+if (!hasSupabaseConfig)
 {
-    throw new InvalidOperationException("Missing Supabase settings: Supabase:Url and Supabase:AnonKey.");
+    Console.WriteLine("Supabase config missing. Check SUPABASE_URL and SUPABASE_ANON_KEY environment variables.");
+    builder.Services.AddScoped<DataProvider>(_ => throw new InvalidOperationException(
+        "Missing Supabase settings: SUPABASE_URL and SUPABASE_ANON_KEY."));
 }
-
-builder.Services.AddScoped(_ => new DataProvider(supabaseUrl, supabaseAnonKey));
+else
+{
+    builder.Services.AddScoped(_ => new DataProvider(supabaseUrl!, supabaseAnonKey!));
+}
 builder.Services.AddScoped<IAuthorBusiness, AuthorBusiness>();
 builder.Services.AddScoped<IBookBusiness, BookBusiness>();
 builder.Services.AddScoped<IUserBusiness, UserBusiness>();
@@ -44,5 +49,5 @@ var app = builder.Build();
 app.UseCors("WebClientCors");
 app.MapControllers();
 app.MapGet("/", () => Results.Ok("BookTracker API is running."));
-app.MapGet("/api/ping", () => Results.Ok(new { status = "ok" }));
+app.MapGet("/api/ping", () => Results.Ok(new { status = "ok", supabaseConfigured = hasSupabaseConfig }));
 app.Run();
