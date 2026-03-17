@@ -27,12 +27,18 @@ function getEnvApiBaseUrl() {
     const envValues = [
         window.WEBCLIENT_API_BASE_URL,
         window.BOOKTRACKER_API_BASE_URL,
+        window.NEXT_PUBLIC_API_BASE_URL,
         document.querySelector('meta[name="webclient-api-base-url"]')?.content
     ];
 
     for (const v of envValues) {
-        if (v && v.trim().length > 0 && v.trim() !== "__RENDER_API_BASE_URL__") {
-            return v.trim();
+        if (typeof v !== "string") {
+            continue;
+        }
+
+        const trimmed = v.trim();
+        if (trimmed && trimmed !== "__RENDER_API_BASE_URL__") {
+            return trimmed;
         }
     }
 
@@ -42,9 +48,8 @@ function getEnvApiBaseUrl() {
 function initializeApiBaseUrl(input) {
     const cached = localStorage.getItem("apiBaseUrl");
     const envUrl = getEnvApiBaseUrl();
-    const fallback = window.location.origin;
+    const initialValue = cached || envUrl || "";
 
-    const initialValue = cached || envUrl || fallback;
     input.value = normalizeBaseUrl(initialValue);
 
     input.addEventListener("change", () => {
