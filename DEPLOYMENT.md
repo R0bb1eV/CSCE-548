@@ -2,6 +2,22 @@
 
 This guide walks a new user from "Download ZIP" to a working deployment (local and hosted).
 
+## AI Usage Summary (required, short)
+### Prompts used (by layer)
+- Front end: add insert/update, make fields user friendly, add delete, increase input sizes, add dividers.
+- API: add CORS headers, fix CORS errors, fix build errors.
+- Data layer: fix JsonDocument disposal, align enum values.
+- Docs: generate deployment doc, update README.
+
+### Changes to AI output
+- CORS tightened to avoid `*`, added origin rules + explicit headers.
+- Activity status updated to Postgres enum (`toread`).
+- Removed OpenAPI package to fix build errors.
+
+### Effectiveness (concise)
+- AI sped up UI and docs, but missed enum mismatch and port conflicts.
+- Required manual fixes for CORS, build locks, and local port usage.
+
 ## Contents
 1. Project overview
 2. Prerequisites

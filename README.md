@@ -6,6 +6,11 @@ BookTracker is a small end-to-end app with:
 - `BookTracker` (shared business/models/data logic)
 - `BookTrackerConsoleClient` (optional console client)
 
+## AI Usage Summary (short)
+- Prompts by layer: front end UI changes, API CORS fixes, data-layer JSON fix, docs updates.
+- Changes to AI output: tightened CORS, enum alignment, removed OpenAPI package.
+- Effectiveness: fast UI + docs; missed enum/port conflicts and required manual fixes.
+
 ## Quick Start (Local)
 1. Open a terminal in the repo root.
 2. Set environment variables:
